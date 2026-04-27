@@ -1,0 +1,66 @@
+{
+  "planPath": "docs/superpowers/plans/2026-04-27-cc-config-bootstrap.md",
+  "tasks": [
+    {
+      "id": 0,
+      "subject": "Task 0: Copy generic skills + plugin-routing.md from dotfiles into cc-config",
+      "status": "pending",
+      "description": "**Goal:** Bring cross-project skills + plugin-routing.md into cc-config.\n\n**Files:**\n- ~/cc-config/plugin-routing.md\n- ~/cc-config/skills/picking-model-tier/SKILL.md\n- ~/cc-config/skills/writing-handoffs/SKILL.md\n\n```json:metadata\n{\"files\":[\"~/cc-config/plugin-routing.md\",\"~/cc-config/skills/picking-model-tier/SKILL.md\",\"~/cc-config/skills/writing-handoffs/SKILL.md\"],\"verifyCommand\":\"diff ~/dotfiles/common/.claude/plugin-routing.md ~/cc-config/plugin-routing.md && diff -r ~/dotfiles/common/.claude/skills/picking-model-tier ~/cc-config/skills/picking-model-tier && diff -r ~/dotfiles/common/.claude/skills/writing-handoffs ~/cc-config/skills/writing-handoffs\",\"acceptanceCriteria\":[\"plugin-routing.md byte-identical\",\"picking-model-tier byte-identical\",\"writing-handoffs byte-identical\",\"committed + pushed to cc-config main\"]}\n```"
+    },
+    {
+      "id": 1,
+      "subject": "Task 1: Adopt precompact-context.sh hook into cc-config",
+      "status": "pending",
+      "description": "**Goal:** Bring (currently untracked) PreCompact hook into version control.\n\n**Files:**\n- ~/cc-config/hooks/precompact-context.sh\n\n```json:metadata\n{\"files\":[\"~/cc-config/hooks/precompact-context.sh\"],\"verifyCommand\":\"diff ~/.claude/hooks/precompact-context.sh ~/cc-config/hooks/precompact-context.sh && test -x ~/cc-config/hooks/precompact-context.sh && echo OK\",\"acceptanceCriteria\":[\"hook content byte-identical\",\"executable bit set\",\"committed + pushed\"]}\n```"
+    },
+    {
+      "id": 2,
+      "subject": "Task 2: Move workflow.md from dotfiles PR #74 into cc-config",
+      "status": "pending",
+      "description": "**Goal:** Migrate workflow.md from unmerged dotfiles PR #74 to cc-config; rewrite internal links.\n\n**Files:**\n- ~/cc-config/docs/workflow.md\n\n```json:metadata\n{\"files\":[\"~/cc-config/docs/workflow.md\"],\"verifyCommand\":\"test -f ~/cc-config/docs/workflow.md && (grep -E '\\\\.\\\\./CLAUDE\\\\.md|\\\\.\\\\./common/' ~/cc-config/docs/workflow.md && exit 1 || echo links OK)\",\"acceptanceCriteria\":[\"file exists\",\"no broken relative links\",\"committed + pushed\"]}\n```"
+    },
+    {
+      "id": 3,
+      "subject": "Task 3: Run cc-config install.sh + verify all 4 symlinks point to cc-config",
+      "status": "pending",
+      "blockedBy": [0, 1],
+      "description": "**Goal:** Activate cc-config; prove the four expected symlinks resolve into cc-config.\n\n**Files (modified via symlink):** ~/.claude/plugin-routing.md, ~/.claude/skills/picking-model-tier, ~/.claude/skills/writing-handoffs, ~/.claude/hooks/precompact-context.sh\n\n```json:metadata\n{\"files\":[],\"verifyCommand\":\"for p in ~/.claude/plugin-routing.md ~/.claude/skills/picking-model-tier ~/.claude/skills/writing-handoffs ~/.claude/hooks/precompact-context.sh; do target=$(readlink \\\"$p\\\"); case \\\"$target\\\" in /Users/montrose/cc-config/*) echo OK ;; *) echo BAD; exit 1 ;; esac; done\",\"acceptanceCriteria\":[\"install.sh exits 0\",\"4 symlinks point to cc-config\",\"precompact hook still produces valid hookSpecificOutput JSON\"]}\n```"
+    },
+    {
+      "id": 4,
+      "subject": "Task 4: Verify Claude Code finds picking-model-tier + writing-handoffs via cc-config symlinks",
+      "status": "pending",
+      "blockedBy": [3],
+      "description": "**Goal:** Manual confirmation that fresh Claude session discovers both skills.\n\n**Critical:** If verification fails, do NOT proceed to Task 5 (dotfiles deletion).\n\n```json:metadata\n{\"files\":[],\"verifyCommand\":\"# Manual — open fresh claude session and check available skills\",\"acceptanceCriteria\":[\"picking-model-tier listed in fresh session\",\"writing-handoffs listed\",\"both invoke successfully\"]}\n```"
+    },
+    {
+      "id": 5,
+      "subject": "Task 5: Remove migrated files from dotfiles + update file-map.md",
+      "status": "pending",
+      "blockedBy": [4],
+      "description": "**Goal:** Delete now-redundant files from dotfiles. Update docs/file-map.md.\n\n**Files:**\n- Delete: ~/dotfiles/common/.claude/{plugin-routing.md, skills/picking-model-tier, skills/writing-handoffs}\n- Modify: ~/dotfiles/docs/file-map.md\n\n```json:metadata\n{\"files\":[\"~/dotfiles/docs/file-map.md\"],\"verifyCommand\":\"cd ~/dotfiles && git pull && test ! -e common/.claude/plugin-routing.md && test ! -e common/.claude/skills/picking-model-tier && test ! -e common/.claude/skills/writing-handoffs && (grep -E 'plugin-routing|picking-model-tier|writing-handoffs' docs/file-map.md && exit 1 || echo clean)\",\"acceptanceCriteria\":[\"3 paths removed\",\"file-map.md cleaned\",\"PR merged via squash --delete-branch\"]}\n```"
+    },
+    {
+      "id": 6,
+      "subject": "Task 6: Verify symlinks + skills still work post-dotfiles-cleanup",
+      "status": "pending",
+      "blockedBy": [5],
+      "description": "**Goal:** Sanity check after dotfiles deletion. cc-config symlinks unchanged; dotfiles-* skills still resolve.\n\n```json:metadata\n{\"files\":[],\"verifyCommand\":\"for p in ~/.claude/plugin-routing.md ~/.claude/skills/picking-model-tier ~/.claude/skills/writing-handoffs ~/.claude/hooks/precompact-context.sh; do target=$(readlink \\\"$p\\\"); case \\\"$target\\\" in /Users/montrose/cc-config/*) ;; *) echo BAD; exit 1 ;; esac; done && for s in dotfiles-aerospace dotfiles-mcp dotfiles-nvim dotfiles-security dotfiles-shell dotfiles-sketchybar; do target=$(readlink \\\"$HOME/.claude/skills/$s\\\"); case \\\"$target\\\" in /Users/montrose/dotfiles/*) ;; *) echo BAD; exit 1 ;; esac; done && echo all OK\",\"acceptanceCriteria\":[\"all cc-config symlinks resolve\",\"all dotfiles-* skill symlinks resolve\",\"fresh session still loads both skills\"]}\n```"
+    },
+    {
+      "id": 7,
+      "subject": "Task 7: Close dotfiles PR #74 (workflow.md draft, superseded)",
+      "status": "pending",
+      "blockedBy": [2],
+      "description": "**Goal:** Close unmerged dotfiles PR #74; the workflow.md it drafted now lives in cc-config.\n\n```json:metadata\n{\"files\":[],\"verifyCommand\":\"test \\\"$(gh pr view 74 --repo jem0ntr053/dotfiles --json state -q .state)\\\" = CLOSED\",\"acceptanceCriteria\":[\"PR #74 closed (not merged)\",\"branch deleted from origin\"]}\n```"
+    },
+    {
+      "id": 8,
+      "subject": "Task 8: Migrate workflow design issues #75-79 from dotfiles to cc-config",
+      "status": "pending",
+      "blockedBy": [6],
+      "description": "**Goal:** Recreate workflow design issues (A/B/C/D + META) in cc-config; cross-link old/new; pin new META; close + unpin old. Re-post brainstorm checkpoint comment from dotfiles#75 onto new cc-config A issue.\n\n```json:metadata\n{\"files\":[],\"verifyCommand\":\"gh issue list --repo jem0ntr053/cc-config --state open --json number | jq 'length' | grep -q 5 && for n in 75 76 77 78 79; do test \\\"$(gh issue view $n --repo jem0ntr053/dotfiles --json state -q .state)\\\" = CLOSED || exit 1; done && echo OK\",\"acceptanceCriteria\":[\"5 issues recreated in cc-config\",\"5 dotfiles issues closed with cross-link\",\"cc-config META pinned\",\"dotfiles META unpinned\",\"brainstorm checkpoint comment migrated\"]}\n```"
+    }
+  ],
+  "lastUpdated": "2026-04-27T01:30:00Z"
+}
