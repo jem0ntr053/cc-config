@@ -29,10 +29,13 @@ Consult the three sources below **in strict priority order**. The first source t
 Look in the current project's `docs/superpowers/handoffs/` directory (and `plans/` and `docs/superpowers/plans/` as fallbacks - any of those may contain a handoff). Sort by mtime. For the newest file, search for the literal heading `## Recommended Model`. If present, parse the `Model:` line; that tier wins.
 
 ```bash
-# Concrete recipe the agent runs:
-ls -t docs/superpowers/handoffs/*.md plans/*.md docs/superpowers/plans/*.md 2>/dev/null \
-  | head -20 \
-  | xargs -I{} sh -c 'grep -l "## Recommended Model" "{}" 2>/dev/null | head -1' \
+# Concrete recipe the agent runs.
+# Uses `find` (not globs) so missing directories don't abort the pipeline
+# under zsh's nomatch behavior — which is what the Claude Code Bash tool runs.
+find docs/superpowers/handoffs plans docs/superpowers/plans \
+  -maxdepth 1 -name '*.md' 2>/dev/null \
+  | xargs ls -t 2>/dev/null \
+  | xargs grep -l "## Recommended Model" 2>/dev/null \
   | head -1
 ```
 
