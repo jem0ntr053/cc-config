@@ -13,6 +13,26 @@ bash install.sh
 
 Idempotent. Re-run after `git pull` to refresh symlinks.
 
+### Wire the SessionStart hook
+
+`install.sh` symlinks `hooks/picking-model-tier-context.sh` into `~/.claude/hooks/`, but the harness only runs it if it's registered as a `SessionStart` hook in `~/.claude/settings.json`. Add this once per machine (use the `update-config` skill in any Claude Code session, or edit settings directly):
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          { "type": "command", "command": "$HOME/.claude/hooks/picking-model-tier-context.sh" }
+        ]
+      }
+    ]
+  }
+}
+```
+
+Without this wiring, `picking-model-tier` falls back to description-based discovery and may lose priority to `brainstorming` / `systematic-debugging` on prompts that match those skills strongly. The hook is the durable forcing function.
+
 ## Dev setup (contributors only)
 
 After cloning, wire the local pre-commit hook so secrets get caught before they ever reach a commit:
@@ -29,9 +49,10 @@ The same scan runs in CI (`.github/workflows/secret-scan.yml`) and is a required
 | Path | What lives here |
 |------|-----------------|
 | `plugin-routing.md` | Canonical token-aware tool/skill routing reference. Auto-loaded by the global CLAUDE.md via `@~/.claude/plugin-routing.md`. |
-| `skills/picking-model-tier/` | Skill - checks task vs current model tier at start-of-work. |
-| `skills/writing-handoffs/` | Skill - appends `## Recommended Model` section to handoff docs. |
+| `skills/picking-model-tier/` | Skill - session-start tier picker. Reads intent sources (handoff doc / memory / first prompt), picks tier, refuses mid-session switching. |
+| `skills/writing-handoffs/` | Skill - appends `## Recommended Model` section to handoff docs and stores a `session-handoff-…` memory entry. |
 | `hooks/precompact-context.sh` | PreCompact hook - injects MEMORY.md + CLAUDE.md into compaction context. |
+| `hooks/picking-model-tier-context.sh` | SessionStart hook - forces `picking-model-tier` to fire as the first skill of every session, ahead of brainstorming / debugging / etc. |
 | `docs/workflow.md` | Human-readable one-page playbook (companion to `plugin-routing.md` which is for Claude). |
 | `docs/superpowers/specs/` | Design docs for workflow improvements (model-switching policy, forcing functions, etc.). |
 | `docs/superpowers/plans/` | Implementation plans derived from specs. |

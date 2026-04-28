@@ -1,6 +1,6 @@
 ---
 name: picking-model-tier
-description: Use when user asks to start work on an issue/bug/feature, implement something, fix something, or begin any new coding task - checks whether the current model tier (opus/sonnet/haiku) fits the task and tells the user to switch if not.
+description: FIRST SKILL TO FIRE EVERY SESSION. Pre-flight tier check that runs BEFORE brainstorming, systematic-debugging, writing-plans, or any other skill. Reads intent sources (handoff doc / memory / first prompt), picks tier (opus/sonnet/haiku), tells the user to /model switch if mismatched. Fires on EVERY first substantive prompt - design, fix, implement, plan, brainstorm, mechanical, or anything else. Mid-session: refuses to switch tiers and surfaces three recovery options instead.
 ---
 
 # Picking Model Tier
