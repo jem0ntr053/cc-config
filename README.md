@@ -13,6 +13,17 @@ bash install.sh
 
 Idempotent. Re-run after `git pull` to refresh symlinks.
 
+## Dev setup (contributors only)
+
+After cloning, wire the local pre-commit hook so secrets get caught before they ever reach a commit:
+
+```bash
+git config core.hooksPath .githooks
+brew install gitleaks   # or see https://github.com/gitleaks/gitleaks
+```
+
+The same scan runs in CI (`.github/workflows/secret-scan.yml`) and is a required status check on `main` — the local hook just gives faster feedback.
+
 ## Layout
 
 | Path | What lives here |
