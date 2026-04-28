@@ -31,4 +31,4 @@ CTX
 )
 
 jq -n --arg ctx "$context" \
-  '{hookSpecificOutput:{hookEventName:"SessionStart",additionalContext:$ctx}}'
+  '{additionalContext:$ctx}'
