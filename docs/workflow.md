@@ -6,10 +6,10 @@ Built for this brain: explicit steps, no hedging, decision tables, named command
 
 ---
 
-## When overwhelmed — minimum viable steps
+## When overwhelmed - minimum viable steps
 
 1. Open this file.
-2. `gh issue list --state open` — what's actually pending.
+2. `gh issue list --state open` - what's actually pending.
 3. Pick **one** issue. Branch: `git checkout -b <topic>`.
 4. Tell Claude in one sentence what you're doing.
 
@@ -32,7 +32,7 @@ Don't try to plan more than one issue at once.
 
 - **One issue at a time.** Resist scope creep.
 - Spotted another bug? → `gh issue create`, then back to current task.
-- Claude shows diffs before applying — by default per memory rules.
+- Claude shows diffs before applying - by default per memory rules.
 - Use `dotfiles-<domain>` skills for domain gotchas: sketchybar, aerospace, nvim, mcp, security, shell.
 - Use `gh issue list --search <topic>` mid-task to confirm what's open.
 
@@ -56,20 +56,20 @@ Don't try to plan more than one issue at once.
 |---------|--------|
 | "I don't know where to start" | `gh issue list` → pick one |
 | "Claude is slow / drifting" | `/clear`, restart with one-sentence goal |
-| "Context feels bloated" | `/compact` — precompact hook injects MEMORY.md + CLAUDE.md |
+| "Context feels bloated" | `/compact` - precompact hook injects MEMORY.md + CLAUDE.md |
 | "Forgot what I was doing" | `git status` + `git log --oneline -5` |
 | "What was decided last time?" | Read `~/.claude/projects/-Users-montrose-dotfiles/memory/MEMORY.md` |
 | "What skill applies here?" | Check the `available skills` list in Claude's session-start reminder |
 
 ---
 
-## Anti-patterns — don't
+## Anti-patterns - don't
 
 - Push directly to `main` (blocked anyway)
 - Edit on `main` without branching first
-- Batch 4+ fixes in one session — one issue, verify, then next
-- Mirror GitHub issues in markdown punchlists — they drift stale
-- Add new long-form content to `CLAUDE.md` — it auto-loads every session; put it in a skill or `docs/`
+- Batch 4+ fixes in one session - one issue, verify, then next
+- Mirror GitHub issues in markdown punchlists - they drift stale
+- Add new long-form content to `CLAUDE.md` - it auto-loads every session; put it in a skill or `docs/`
 
 ---
 
@@ -81,7 +81,7 @@ Don't try to plan more than one issue at once.
 | Repo file inventory | `docs/file-map.md` |
 | Token-aware tool routing (Claude reads) | `~/.claude/plugin-routing.md` |
 | Domain guidance (Claude loads on demand) | `~/.claude/skills/dotfiles-<X>/SKILL.md` |
-| Recent decisions / context | Automem (MCP) — Claude recalls automatically |
+| Recent decisions / context | Automem (MCP) - Claude recalls automatically |
 | Per-project session-recall hints | `~/.claude/projects/-Users-montrose-dotfiles/memory/MEMORY.md` |
 | Plans / specs (write-once, read-once) | `docs/superpowers/{plans,specs}/` |
 
@@ -89,9 +89,9 @@ Don't try to plan more than one issue at once.
 
 ## Token-saving habits
 
-- **Use a skill** instead of explaining context — `/dotfiles-sketchybar` etc.
-- Let `gh issue list` answer "what's open" — don't ask Claude to recall.
-- Don't paste large files into chat — Claude reads files itself.
+- **Use a skill** instead of explaining context - `/dotfiles-sketchybar` etc.
+- Let `gh issue list` answer "what's open" - don't ask Claude to recall.
+- Don't paste large files into chat - Claude reads files itself.
 - Keep `CLAUDE.md` slim. New architecture details → into a skill.
 - `/caveman` = ~75% fewer output tokens; `/caveman:compress <file>` for memory files.
 
@@ -112,6 +112,6 @@ Don't try to plan more than one issue at once.
 
 ## See also
 
-- [`plugin-routing.md`](../plugin-routing.md) — technical routing reference (for Claude)
-- [Spec: model-switching policy](superpowers/specs/2026-04-27-model-switching-policy-design.md) — once written
-- [META issue](https://github.com/jem0ntr053/cc-config/issues) — current workflow improvement work
+- [`plugin-routing.md`](../plugin-routing.md) - technical routing reference (for Claude)
+- [Spec: model-switching policy](superpowers/specs/2026-04-27-model-switching-policy-design.md) - once written
+- [META issue](https://github.com/jem0ntr053/cc-config/issues) - current workflow improvement work

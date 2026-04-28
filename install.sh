@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# cc-config install — symlink contents into ~/.claude/
+# cc-config install - symlink contents into ~/.claude/
 # Idempotent. Re-run after `git pull` to refresh.
 
 set -euo pipefail

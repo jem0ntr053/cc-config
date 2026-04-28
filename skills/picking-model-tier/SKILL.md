@@ -1,6 +1,6 @@
 ---
 name: picking-model-tier
-description: Use when user asks to start work on an issue/bug/feature, implement something, fix something, or begin any new coding task — checks whether the current model tier (opus/sonnet/haiku) fits the task and tells the user to switch if not.
+description: Use when user asks to start work on an issue/bug/feature, implement something, fix something, or begin any new coding task - checks whether the current model tier (opus/sonnet/haiku) fits the task and tells the user to switch if not.
 ---
 
 # Picking Model Tier
@@ -33,15 +33,15 @@ If current tier matches the task: proceed silently, no need to mention the check
 
 If mismatch, say one short line. Format:
 
-> Task looks [category] ([one-phrase reason]). Suggest `/model <tier>` before we start — [token/capability reason].
+> Task looks [category] ([one-phrase reason]). Suggest `/model <tier>` before we start - [token/capability reason].
 
 Examples:
 
-> Task looks mechanical (rename across 2 files). Suggest `/model haiku` before we start — saves tokens.
+> Task looks mechanical (rename across 2 files). Suggest `/model haiku` before we start - saves tokens.
 
-> Task looks like architecture (no plan yet, cross-file redesign). Suggest `/model opus` before we start — this tier fits design calls.
+> Task looks like architecture (no plan yet, cross-file redesign). Suggest `/model opus` before we start - this tier fits design calls.
 
-> Task looks like plan execution (plans/2026-04-22-x.md already written). Suggest `/model sonnet` before we start — saves opus tokens with no capability loss.
+> Task looks like plan execution (plans/2026-04-22-x.md already written). Suggest `/model sonnet` before we start - saves opus tokens with no capability loss.
 
 ## When NOT to Use
 
