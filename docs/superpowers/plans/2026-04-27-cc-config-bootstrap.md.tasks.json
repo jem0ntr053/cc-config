@@ -31,7 +31,7 @@
       "subject": "Task 4: Verify Claude Code finds picking-model-tier + writing-handoffs via cc-config symlinks",
       "status": "pending",
       "blockedBy": [3],
-      "description": "**Goal:** Manual confirmation that fresh Claude session discovers both skills.\n\n**Critical:** If verification fails, do NOT proceed to Task 5 (dotfiles deletion).\n\n```json:metadata\n{\"files\":[],\"verifyCommand\":\"# Manual — open fresh claude session and check available skills\",\"acceptanceCriteria\":[\"picking-model-tier listed in fresh session\",\"writing-handoffs listed\",\"both invoke successfully\"]}\n```"
+      "description": "**Goal:** Manual confirmation that fresh Claude session discovers both skills.\n\n**Critical:** If verification fails, do NOT proceed to Task 5 (dotfiles deletion).\n\n```json:metadata\n{\"files\":[],\"verifyCommand\":\"# Manual - open fresh claude session and check available skills\",\"acceptanceCriteria\":[\"picking-model-tier listed in fresh session\",\"writing-handoffs listed\",\"both invoke successfully\"]}\n```"
     },
     {
       "id": 5,

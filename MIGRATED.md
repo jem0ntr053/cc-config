@@ -17,7 +17,7 @@ Migrated GitHub issues:
 - dotfiles#79 (META) → top-level tracker
 
 Issues that stayed in dotfiles (operational, dotfiles-specific):
-- #66, #67 + #36–46 — sketchybar polish
-- #70, #71, #72 — PowerShell improvements
-- #80 — chezmoi evaluation
-- #25, #24, #32 — misc dotfiles
+- #66, #67 + #36–46 - sketchybar polish
+- #70, #71, #72 - PowerShell improvements
+- #80 - chezmoi evaluation
+- #25, #24, #32 - misc dotfiles

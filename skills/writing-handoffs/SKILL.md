@@ -1,6 +1,6 @@
 ---
 name: writing-handoffs
-description: Use when writing handoff documents — plans/ files, worktree handoff notes, phase transitions, "resume here next session" summaries, or any doc meant for another Claude session to pick up.
+description: Use when writing handoff documents - plans/ files, worktree handoff notes, phase transitions, "resume here next session" summaries, or any doc meant for another Claude session to pick up.
 ---
 
 # Writing Handoffs
@@ -37,12 +37,12 @@ If the doc is NOT a handoff (a spec, a bug report, a README), skip.
 
 ## Required Output Format
 
-Append exactly this block at the end of the handoff (after every other section). The `~~~` below are markdown fences showing the block — paste only the heading and three bullets, not the tildes:
+Append exactly this block at the end of the handoff (after every other section). The `~~~` below are markdown fences showing the block - paste only the heading and three bullets, not the tildes:
 
 ~~~
 ## Recommended Model
 - Model: sonnet
-- Reason: <one sentence, ≤25 words, no em-dash continuation — what the next session is doing and why that tier fits>
+- Reason: <one sentence, ≤25 words, no em-dash continuation - what the next session is doing and why that tier fits>
 - Resume: `/model sonnet`
 ~~~
 

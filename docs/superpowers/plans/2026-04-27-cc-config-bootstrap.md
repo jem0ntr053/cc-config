@@ -6,7 +6,7 @@
 
 **Architecture:** Fresh-start migration (no `git filter-repo` history transplant). Files copied into cc-config; `install.sh` symlinks them into `~/.claude/`; dotfiles deletes its copies after verification proves cc-config installs are working. Workflow design issues (#75-79) recreated in cc-config; operational dotfiles issues stay in dotfiles.
 
-**Tech Stack:** bash, git, gh CLI. No tests in the unit-test sense — verification is operational (`readlink`, fresh-session checks, `gh issue list`).
+**Tech Stack:** bash, git, gh CLI. No tests in the unit-test sense - verification is operational (`readlink`, fresh-session checks, `gh issue list`).
 
 **Pre-requisites already complete:**
 - ✅ cc-config repo created on GitHub (private) and cloned to `~/cc-config`
@@ -176,9 +176,9 @@ The replacement "See also" section should be:
 ```markdown
 ## See also
 
-- [`plugin-routing.md`](../plugin-routing.md) — technical routing reference (for Claude)
-- [Spec: model-switching policy](superpowers/specs/2026-04-27-model-switching-policy-design.md) — once written
-- [META issue](https://github.com/jem0ntr053/cc-config/issues/) — current workflow improvement work
+- [`plugin-routing.md`](../plugin-routing.md) - technical routing reference (for Claude)
+- [Spec: model-switching policy](superpowers/specs/2026-04-27-model-switching-policy-design.md) - once written
+- [META issue](https://github.com/jem0ntr053/cc-config/issues/) - current workflow improvement work
 ```
 
 Use the Write tool (or `tee`) to create the final file with this section replaced. Everything else (overview, sections, tables) stays identical.
@@ -205,7 +205,7 @@ git push
 
 ### Task 3: Run cc-config install.sh and verify all symlinks point to cc-config
 
-**Goal:** Activate cc-config — run its installer, then prove the four expected symlinks resolve into cc-config and not dotfiles.
+**Goal:** Activate cc-config - run its installer, then prove the four expected symlinks resolve into cc-config and not dotfiles.
 
 **Files:**
 - Modify (via symlink): `~/.claude/plugin-routing.md`, `~/.claude/skills/picking-model-tier`, `~/.claude/skills/writing-handoffs`, `~/.claude/hooks/precompact-context.sh`
@@ -224,7 +224,7 @@ readlink ~/.claude/hooks/precompact-context.sh # expect: /Users/montrose/cc-conf
 
 **Steps:**
 
-- [ ] **Step 1: Pre-flight — record current symlink state**
+- [ ] **Step 1: Pre-flight - record current symlink state**
 
 ```bash
 echo "=== before install ==="
@@ -267,7 +267,7 @@ echo "ctx-len: $(jq -r '.hookSpecificOutput.additionalContext | length' /tmp/pre
 ```
 Expected: exit 0, "PreCompact", non-zero ctx-len.
 
-If anything fails: the original `~/.claude/hooks/precompact-context.sh` content is preserved in `~/cc-config/hooks/precompact-context.sh` — restore via `cp ~/cc-config/hooks/precompact-context.sh ~/.claude/hooks/precompact-context.sh` (without symlink).
+If anything fails: the original `~/.claude/hooks/precompact-context.sh` content is preserved in `~/cc-config/hooks/precompact-context.sh` - restore via `cp ~/cc-config/hooks/precompact-context.sh ~/.claude/hooks/precompact-context.sh` (without symlink).
 
 ---
 
@@ -294,7 +294,7 @@ cd /tmp && claude
 
 **Steps:**
 
-- [ ] **Step 1: Open a fresh `claude` session in a different terminal or `/clear` this one** (this turn-out boundary is a manual user action — agent dispatching plan should ask the user to confirm)
+- [ ] **Step 1: Open a fresh `claude` session in a different terminal or `/clear` this one** (this turn-out boundary is a manual user action - agent dispatching plan should ask the user to confirm)
 
 - [ ] **Step 2: Verify the system-reminder available-skills list includes both** (look for lines like `- picking-model-tier: ...` and `- writing-handoffs: ...`)
 
@@ -302,7 +302,7 @@ cd /tmp && claude
 
 - [ ] **Step 4: Repeat for `writing-handoffs`**
 
-If either fails: do NOT proceed to Task 5 (which deletes from dotfiles). Investigate first — likely cause is wrong symlink target or Claude Code cache.
+If either fails: do NOT proceed to Task 5 (which deletes from dotfiles). Investigate first - likely cause is wrong symlink target or Claude Code cache.
 
 ---
 
@@ -314,7 +314,7 @@ If either fails: do NOT proceed to Task 5 (which deletes from dotfiles). Investi
 - Delete from dotfiles: `common/.claude/plugin-routing.md`
 - Delete from dotfiles: `common/.claude/skills/picking-model-tier/` (and parent if empty)
 - Delete from dotfiles: `common/.claude/skills/writing-handoffs/` (and parent if empty)
-- Modify: `~/dotfiles/docs/file-map.md` — remove the three rows for the deleted files
+- Modify: `~/dotfiles/docs/file-map.md` - remove the three rows for the deleted files
 
 **Acceptance Criteria:**
 - [ ] Files removed from dotfiles main (after PR merge)
@@ -381,7 +381,7 @@ jem0ntr053/cc-config and are symlinked into ~/.claude/ via that
 repo's install.sh. Dotfiles-specific skills (dotfiles-*) stay here.
 
 The @~/.claude/plugin-routing.md import in this repo's CLAUDE.md
-continues to resolve correctly — only the symlink target changed.
+continues to resolve correctly - only the symlink target changed.
 
 Co-extraction: closes follow-up to PRs #69 and #73; superseded
 PR #74 (workflow.md moved to cc-config).
@@ -395,9 +395,9 @@ git push -u origin cleanup/post-cc-config-extraction
 ```bash
 gh pr create --title "chore: extract cross-project Claude config to cc-config repo" --body "$(cat <<'EOF'
 ## Summary
-Extracts the cross-project Claude Code config (plugin-routing.md, picking-model-tier skill, writing-handoffs skill) from dotfiles into the new private \`jem0ntr053/cc-config\` repo. These were already cross-project in spirit (stowed into \`~/.claude/\`) — now they live with the rest of the cross-project workflow improvement work.
+Extracts the cross-project Claude Code config (plugin-routing.md, picking-model-tier skill, writing-handoffs skill) from dotfiles into the new private \`jem0ntr053/cc-config\` repo. These were already cross-project in spirit (stowed into \`~/.claude/\`) - now they live with the rest of the cross-project workflow improvement work.
 
-After merge, dotfiles stops loading workflow design context every session — savings repeat per-session.
+After merge, dotfiles stops loading workflow design context every session - savings repeat per-session.
 
 ## Verification (already done before opening this PR)
 - cc-config repo bootstrapped, install.sh symlinks all four targets correctly
@@ -406,7 +406,7 @@ After merge, dotfiles stops loading workflow design context every session — sa
 
 ## Out of scope
 - Workflow design issues #75-79 migrate to cc-config in a separate gh-only step (no PR needed)
-- PR #74 (workflow.md draft) closed without merge — content moved to cc-config
+- PR #74 (workflow.md draft) closed without merge - content moved to cc-config
 EOF
 )"
 
@@ -426,7 +426,7 @@ cd ~/dotfiles && git checkout main && git pull
 
 ### Task 6: Verify symlinks still resolve and skills still load post-dotfiles-cleanup
 
-**Goal:** Sanity check after the dotfiles deletion — symlinks must still point into cc-config (they should, untouched by dotfiles changes) and skills must still load.
+**Goal:** Sanity check after the dotfiles deletion - symlinks must still point into cc-config (they should, untouched by dotfiles changes) and skills must still load.
 
 **Files:** None modified.
 
@@ -460,7 +460,7 @@ Expected: 10 lines all starting with "OK".
 
 - [ ] **Step 1: Run readlink verification block** (above)
 
-- [ ] **Step 2: Manual — fresh `claude` session, confirm both cc-config-served skills still listed**
+- [ ] **Step 2: Manual - fresh `claude` session, confirm both cc-config-served skills still listed**
 
 If anything is "BAD": investigate immediately. cc-config symlinks should not have changed. dotfiles symlinks for `dotfiles-*` skills are unaffected by this migration.
 
@@ -470,7 +470,7 @@ If anything is "BAD": investigate immediately. cc-config symlinks should not hav
 
 **Goal:** Close the unmerged dotfiles PR that drafted `docs/workflow.md`, since that file now lives in cc-config.
 
-**Files:** None modified locally — GitHub-only operation.
+**Files:** None modified locally - GitHub-only operation.
 
 **Acceptance Criteria:**
 - [ ] Dotfiles PR #74 is closed (not merged)
@@ -490,7 +490,7 @@ Expected: `CLOSED`.
 gh pr close 74 --repo jem0ntr053/dotfiles --comment "$(cat <<'EOF'
 Superseded by the cc-config bootstrap migration (2026-04-27). \`docs/workflow.md\` now lives at https://github.com/jem0ntr053/cc-config/blob/main/docs/workflow.md.
 
-The dotfiles repo no longer carries cross-project workflow docs — see the cleanup PR that removes plugin-routing.md and the generic skills.
+The dotfiles repo no longer carries cross-project workflow docs - see the cleanup PR that removes plugin-routing.md and the generic skills.
 EOF
 )" --delete-branch
 ```
@@ -509,7 +509,7 @@ Expected: `CLOSED`, branch removed locally too.
 
 **Goal:** Recreate the workflow design issues (sub-issues A/B/C/D and the META) in cc-config. Cross-link old and new. Pin the new META in cc-config.
 
-**Files:** None local — GitHub-only.
+**Files:** None local - GitHub-only.
 
 **Acceptance Criteria:**
 - [ ] Five new issues exist in cc-config (one per migrated dotfiles issue)
@@ -563,7 +563,7 @@ dotfiles#77 -> cc-config#__
 dotfiles#78 -> cc-config#__
 ```
 
-Also note: the comment on dotfiles#75 carries the "checkpoint" of the model-switching brainstorm. Re-post that comment on the new cc-config issue too — it's load-bearing for resuming A:
+Also note: the comment on dotfiles#75 carries the "checkpoint" of the model-switching brainstorm. Re-post that comment on the new cc-config issue too - it's load-bearing for resuming A:
 
 ```bash
 # Get the checkpoint comment body from dotfiles#75 (the comment we added earlier)
@@ -623,15 +623,15 @@ Expected: five new cc-config issues; five dotfiles closures; one pinned cc-confi
 ## Self-review notes
 
 **Spec coverage:**
-- ✅ Bootstrap empty repo — already done (pre-requisite)
-- ✅ Copy files (skills, plugin-routing.md, hook, workflow.md) — Tasks 0, 1, 2
-- ✅ Run install.sh + verify symlinks — Task 3
-- ✅ Verify Claude Code finds skills — Task 4
-- ✅ Branch in dotfiles, remove migrated content + update file-map.md — Task 5
-- ✅ Verify post-cleanup — Task 6
-- ✅ Close PR #74 — Task 7
-- ✅ Issue migration — Task 8
-- ✅ Resume A's spec write — explicitly out of scope (success criterion of bootstrap is "cc-config functional + issues migrated"; A is follow-up)
+- ✅ Bootstrap empty repo - already done (pre-requisite)
+- ✅ Copy files (skills, plugin-routing.md, hook, workflow.md) - Tasks 0, 1, 2
+- ✅ Run install.sh + verify symlinks - Task 3
+- ✅ Verify Claude Code finds skills - Task 4
+- ✅ Branch in dotfiles, remove migrated content + update file-map.md - Task 5
+- ✅ Verify post-cleanup - Task 6
+- ✅ Close PR #74 - Task 7
+- ✅ Issue migration - Task 8
+- ✅ Resume A's spec write - explicitly out of scope (success criterion of bootstrap is "cc-config functional + issues migrated"; A is follow-up)
 
 **Type/path consistency:**
 - All paths use `~/cc-config/` and `~/dotfiles/` consistently
@@ -642,4 +642,4 @@ Expected: five new cc-config issues; five dotfiles closures; one pinned cc-confi
 - Task 4 explicit "do NOT proceed to Task 5 if verification fails"
 - Task 6 catches any regression caused by Task 5
 
-**Open assumption:** Step 3 of Task 2 (workflow.md link adaptation) is somewhat manual — the agent executing should use Read + Edit tools rather than scripted sed, since the link structure is best done with eyes on the content. Documented inline in the task.
+**Open assumption:** Step 3 of Task 2 (workflow.md link adaptation) is somewhat manual - the agent executing should use Read + Edit tools rather than scripted sed, since the link structure is best done with eyes on the content. Documented inline in the task.

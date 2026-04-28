@@ -15,12 +15,12 @@ CODE:      brainstorming → writing-plans → executing-plans (TDD inside) → 
 
 ## Always-On Defaults (auto, no invocation)
 
-- caveman mode — terse output (until "stop caveman")
-- automem recall_memory — session start
-- gh issue list — session start (open work tracked in GitHub issues, not markdown)
-- LSP (swift / pyright / lua) — auto on matching file edits
-- picking-model-tier — starting any new task
-- auto-memory writes — learn user fact / feedback / project state / external reference
+- caveman mode - terse output (until "stop caveman")
+- automem recall_memory - session start
+- gh issue list - session start (open work tracked in GitHub issues, not markdown)
+- LSP (swift / pyright / lua) - auto on matching file edits
+- picking-model-tier - starting any new task
+- auto-memory writes - learn user fact / feedback / project state / external reference
 
 ## Skip Rules
 
@@ -102,4 +102,4 @@ caveman:compress         | shrink CLAUDE.md / memory files  | 🟢 | small file
 - context7 for general programming concepts
 - Self-launch ultrareview (user-only)
 - Casually delete `.superpowers/` session dirs
-- Mirror GitHub issues in markdown punchlists or memory snapshots — issues are canonical
+- Mirror GitHub issues in markdown punchlists or memory snapshots - issues are canonical
