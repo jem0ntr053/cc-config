@@ -23,7 +23,7 @@ Don't try to plan more than one issue at once.
 |------|---------|-----|
 | 1. Pick the work | `gh issue list` | Single source of truth |
 | 2. Branch | `git checkout -b <topic>` | Main is protected |
-| 3. Pick model | `/model opus` (design/plan) or `/model sonnet` (mechanical) | `picking-model-tier` skill also nudges |
+| 3. Pick model | Run `/model <tier>` per skill suggestion | `picking-model-tier` reads handoff/memory/first prompt at session start; locks tier for the session |
 | 4. State the goal | One sentence to Claude | "Fix #44 font weight on dark bg" |
 
 ---
@@ -106,12 +106,12 @@ Don't try to plan more than one issue at once.
 | Mechanical edit, follow a plan | Sonnet 4.6 |
 | Trivial chat / quick lookup | Haiku 4.5 |
 
-`picking-model-tier` skill auto-fires at task start to remind.
+`picking-model-tier` fires at session start, consults handoff doc → memory → your first prompt (in that order) and tells you which tier to use. Mid-session it refuses to switch and surfaces three recovery options (accept / `/clear` / handoff + new session).
 
 ---
 
 ## See also
 
 - [`plugin-routing.md`](../plugin-routing.md) - technical routing reference (for Claude)
-- [Spec: model-switching policy](superpowers/specs/2026-04-27-model-switching-policy-design.md) - once written
+- [Spec: model-switching policy](superpowers/specs/2026-04-27-model-switching-policy-design.md)
 - [META issue](https://github.com/jem0ntr053/cc-config/issues) - current workflow improvement work

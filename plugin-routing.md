@@ -36,7 +36,7 @@ ALWAYS-ON
 caveman mode             | terse every reply                | 🟢 | "stop caveman"
 automem recall_memory    | session start                    | 🟢 | offline
 LSP (swift/pyright/lua)  | matching file edits              | 🟢 | non-matching lang
-picking-model-tier       | starting any new task            | 🟢 | trivial chat
+picking-model-tier       | session start (intent-sourced)   | 🟢 | mid-session, chitchat
 auto-memory write        | learn user fact / feedback       | 🟢 | derivable from code
 
 INTAKE / RESEARCH

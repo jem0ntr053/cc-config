@@ -48,6 +48,21 @@ Append exactly this block at the end of the handoff (after every other section).
 
 Fill `Model` and `Resume` with the actual choice. `Reason` must be ONE sentence (one period, ≤25 words, no em-dash splicing), concrete about the next step (not "the work continues").
 
+## Required Memory Write
+
+After writing the handoff doc, also store a memory entry so the next session can recover the recommended model even if the handoff file is deleted or the next session is cross-project.
+
+Call `mcp__plugin_automem_memory__store_memory` with exactly this shape:
+
+- **name:** `session-handoff-YYYY-MM-DD-HHMM` (use the timestamp at handoff write time, in UTC)
+- **description:** `Session handoff: next session should use <tier>. Intent: <intent-category>.`
+  - `<tier>` is one of `opus`, `sonnet`, `haiku` - must match the `Model:` line in the doc
+  - `<intent-category>` is one of `design`, `execute-plan`, `mechanical`, `unclear`
+- **type:** `project`
+- **content:** the full Recommended Model block (three lines: `Model: ...`, `Reason: ...`, `Resume: ...`) verbatim, so the source-of-truth tier is captured in the body
+
+This memory write is **mandatory**, not optional. The picking-model-tier skill consults it as intent source #2.
+
 ## Examples
 
 **Good:**

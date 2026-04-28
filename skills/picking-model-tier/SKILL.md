@@ -7,51 +7,101 @@ description: Use when user asks to start work on an issue/bug/feature, implement
 
 ## Overview
 
-Opus eats tokens. Running mechanical edits on opus is waste. Running architecture calls on haiku is worse. This skill fires at start-of-work to confirm the current model tier matches the task.
+Opus eats tokens. Mechanical edits on opus are waste. Architecture calls on haiku are worse. Worse still: a mid-session `/model` switch invalidates the warm prompt cache and pays a ~$0.26 round-trip on a 50K-token context, exceeding the savings on any task under ~10K mechanical tokens. This skill picks the right tier **once**, at session start, then refuses every subsequent in-session switch.
 
-## The Rule
+The full design is in `docs/superpowers/specs/2026-04-27-model-switching-policy-design.md`.
 
-Before starting work, classify the task per the rubric. If the current model tier doesn't match, tell the user to switch with `/model <tier>` before proceeding. Do not start substantive work until the user confirms or overrides. Classification and brief clarifying questions (e.g. "which three files?") are fine pre-switch; actual edits, commands, and multi-step investigation are gated.
+## When This Skill Fires
 
-## Selection Rubric
+- **Session start (cache cold):** the agent has just been launched, or the user has just run `/clear`. Pick the tier here.
+- **Mid-session (cache warm):** any turn after the first substantive one. Refuse to switch tier; surface the three recovery options instead.
 
-| Task type | Model |
+The two cases use different logic. Do not conflate them.
+
+## Session Start - Pick the Tier
+
+### Step 1: Determine session intent from the priority sources
+
+Consult the three sources below **in strict priority order**. The first source that yields a value wins. Do not consult later sources once a value is found.
+
+**Source #1 - Most recent handoff doc with a `## Recommended Model` section**
+
+Look in the current project's `docs/superpowers/handoffs/` directory (and `plans/` and `docs/superpowers/plans/` as fallbacks - any of those may contain a handoff). Sort by mtime. For the newest file, search for the literal heading `## Recommended Model`. If present, parse the `Model:` line; that tier wins.
+
+```bash
+# Concrete recipe the agent runs:
+ls -t docs/superpowers/handoffs/*.md plans/*.md docs/superpowers/plans/*.md 2>/dev/null \
+  | head -20 \
+  | xargs -I{} sh -c 'grep -l "## Recommended Model" "{}" 2>/dev/null | head -1' \
+  | head -1
+```
+
+If the recipe returns a file, read its `Model:` line and use that tier.
+
+**Source #2 - Most recent `session-handoff-…` memory entry**
+
+Call `mcp__plugin_automem_memory__recall_memory` with a query like `"session-handoff recommended model"` and `limit: 5`. Find the most recent entry whose `name` field starts with `session-handoff-`. Parse the description's `<tier>` placeholder; that tier wins.
+
+If no such memory entry exists, fall through to source #3.
+
+**Source #3 - User's first prompt of the session**
+
+Classify the user's first substantive message against the intent table below. Pick the matching tier.
+
+### Step 2: Map intent to tier
+
+| Session intent | Tier |
 |---|---|
-| Architecture, brainstorming, cross-file design, root-cause debugging of unknown failures | `opus` |
-| Implementing a written plan, test generation from a spec, refactors with clear scope, code review | `sonnet` |
-| Mechanical edits, formatting, renames, single-file tweaks, boilerplate, log parsing | `haiku` |
+| Design / brainstorm / plan / unclear scope | `opus` |
+| Execute a written plan with no judgment calls | `sonnet` |
+| Mechanical edit against a well-specified target | `haiku` |
+| No clear intent | `opus` (quality default) |
 
-## Default Bias (Opus eats tokens)
+### Step 3: Confirm or switch before doing real work
 
-- Task has a written plan → `sonnet`
-- Task is "decide what to do" → `opus`
-- Task is mechanical → `haiku`
+- If the current model already matches the picked tier: proceed silently. Do not announce the check.
+- If the current model is the **wrong** tier: tell the user in one short line, e.g.
 
-## What to Say to the User
+  > Session intent looks like execute-plan (handoff doc names sonnet). Suggest `/model sonnet` before we start - saves opus tokens with no capability loss.
 
-If current tier matches the task: proceed silently, no need to mention the check.
+  Wait for the user to confirm the switch (or override) before starting substantive work. Classification, brief clarifying questions, and reading existing files are fine pre-switch; edits, multi-file investigations, and non-trivial commands are gated.
 
-If mismatch, say one short line. Format:
+## Mid-Session - Refuse to Switch
 
-> Task looks [category] ([one-phrase reason]). Suggest `/model <tier>` before we start - [token/capability reason].
+If at any point during the session the agent would otherwise tell the user to run `/model <tier>`, **stop**. The cache cost of the switch exceeds the savings on essentially every remaining task.
 
-Examples:
+Instead, surface the three recovery options exactly as listed in the spec:
 
-> Task looks mechanical (rename across 2 files). Suggest `/model haiku` before we start - saves tokens.
+> Started on the wrong tier. Three recovery options:
+> 1. **Accept it** - finish what we started; the over- or under-spend is bounded by remaining session length.
+> 2. **`/clear` and restart** - same `claude` process, fresh context (cache resets to cold), pick the right tier this time.
+> 3. **Save handoff via `writing-handoffs` and start a new `claude` session** - preserves work-in-progress across the tier switch.
+>
+> Mid-session `/model` switching is never the right call - it invalidates the warm cache and pays the round-trip cost for whatever savings the cheaper tier might have given.
 
-> Task looks like architecture (no plan yet, cross-file redesign). Suggest `/model opus` before we start - this tier fits design calls.
+Wait for the user to pick one. Do not pre-choose for them. If the user explicitly overrides ("just switch anyway"), honor it but do not initiate it.
 
-> Task looks like plan execution (plans/2026-04-22-x.md already written). Suggest `/model sonnet` before we start - saves opus tokens with no capability loss.
+## Effort Dial - Per-Turn, No Cache Cost
+
+Effort (`xhigh` / `high` / `medium` / `low`) is independent of tier. It controls thinking-token budget without invalidating the prompt cache, so it can be re-set per turn:
+
+| Activity | Effort |
+|---|---|
+| Design / debug / unknown failure mode | `xhigh` or `high` |
+| Standard execution from a written plan | `medium` |
+| Mechanical edit | `low` |
+
+Adjust effort freely. Adjust tier never (within a session).
 
 ## When NOT to Use
 
-- User already on the matching tier → proceed silently.
-- Continuation of existing in-session work → don't re-check mid-task.
-- User explicitly says "stay on <model>" or "don't switch" → honor override.
-- One-off questions / quick lookups → not "starting work."
+- Continuation of in-session work past the first substantive turn - the session-start check has already happened; do not re-run it.
+- One-off questions, lookups, or chitchat - not a "session" in the cache-amortization sense.
+- User explicitly says "stay on `<model>`" or "don't check tier" - honor the override.
 
 ## Red Flags
 
-- User says "let's work on #N", "fix this bug", "implement X", "start on Y" → this skill applies; run the check.
-- About to dive into edits without classifying task → stop and classify first.
-- Tier mismatch + proceeding anyway → wrong.
+- About to suggest a mid-session `/model` switch → wrong; surface the three recovery options instead.
+- About to dive into substantive edits without consulting the priority-source list → stop and consult.
+- Found a handoff doc but ignored it in favor of classifying the user's prompt → wrong; source #1 wins.
+- Adjusting effort confused with adjusting tier → effort is per-turn-fine, tier is per-session-locked.
