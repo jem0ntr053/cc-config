@@ -2,6 +2,8 @@
 
 Canonical token-aware routing. Pick the right tool for the phase. Cheap calls first, heavy workflows only when warranted.
 
+**Audience:** Claude (auto-loaded). Human-readable companion: `docs/workflow.md`.
+
 Legend: 🟢 cheap/free · 🟡 medium · 🔴 heavy
 
 ## Phase Strips (lifecycle order)
@@ -32,6 +34,8 @@ CODE:      brainstorming → writing-plans → executing-plans (TDD inside) → 
 ## Trigger Table
 
 ```
+Skill | When to use | Cost | When to skip
+
 ALWAYS-ON
 caveman mode             | terse every reply                | 🟢 | "stop caveman"
 automem recall_memory    | session start                    | 🟢 | offline
