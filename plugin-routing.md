@@ -8,12 +8,32 @@ Legend: 🟢 cheap/free · 🟡 medium · 🔴 heavy
 
 ## Phase Strips (lifecycle order)
 
+Each step names the **specific** skill / agent / tool to invoke. `[brackets]` = conditional. `*` = see footnote.
+
 ```
-RESEARCH:  recall-memory → context7 / Explore-agent → answer (no code)
-CONFIG:    [picking-model-tier] → update-config OR direct-edit → verify → store-memory(if novel)
-DEBUG:     systematic-debugging → reproduce → root-cause → fix → verification-before-completion
-CODE:      brainstorming → writing-plans → executing-plans (TDD inside) → verification → requesting-code-review → finishing-branch
+RESEARCH:  recall_memory → context7 query-docs / Explore-agent / claude-code-guide-agent → answer (no code)
+
+CONFIG:    picking-model-tier → update-config OR direct-edit → verification-before-completion
+           → store_memory (if novel) → [commit: caveman-commit]
+
+DEBUG:     systematic-debugging → reproduce → root-cause → fix → [security-review *]
+           → verification-before-completion → [commit: caveman-commit]
+
+CODE:      brainstorming → writing-plans → executing-plans (TDD inside)
+           → verification-before-completion → [security-review *]
+           → requesting-code-review (caveman-review on output) → finishing-a-dev-branch
+           → [commit: caveman-commit]
 ```
+
+**\* security-review trigger (heuristic, not always-run).** Invoke `security-review` when the change touches any of:
+- auth / authn / authz code paths
+- secrets, tokens, credentials, API keys
+- crypto, signing, hashing, randomness
+- network boundaries (HTTP handlers, RPC, deserializers, webhooks)
+- input validation at any trust boundary
+- file / path handling driven by user input
+
+Skip for docs-only, test-only, UI styling, and pure config that does not touch the above. When in doubt, run it — `security-review` is 🟡 medium cost.
 
 ## Always-On Defaults (auto, no invocation)
 
