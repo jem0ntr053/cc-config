@@ -97,6 +97,87 @@ Don't try to plan more than one issue at once.
 
 ---
 
+## Lifecycle phases - which skill to invoke at each step
+
+Mirrors the phase strips in `plugin-routing.md`. Use this as the human-readable companion. Each step names the *specific* skill or agent — no ambiguity.
+
+### RESEARCH (Q&A, no code change)
+1. `recall_memory` — pull prior decisions / context
+2. `context7 query-docs` (libraries) **/** `Explore` agent (>3 greps) **/** `claude-code-guide` agent (CC/SDK/API how-to)
+3. Answer in chat (no code edits)
+
+### CONFIG (settings, hooks, dotfiles)
+1. `picking-model-tier` — session-start tier check
+2. `update-config` skill (settings.json / hooks / permissions) **OR** direct edit (other dotfiles)
+3. `verification-before-completion` — confirm setting actually took effect
+4. `store_memory` — only if the change reflects a non-derivable preference / decision
+5. Commit with `caveman-commit`
+
+### DEBUG (bug, failing test, wrong output)
+1. `systematic-debugging`
+2. Reproduce reliably
+3. Identify root cause (not just symptom)
+4. Fix
+5. **`security-review` if security-sensitive** *(see trigger below)*
+6. `verification-before-completion`
+7. Commit with `caveman-commit`
+
+### CODE (feature / non-trivial change)
+1. `brainstorming` — design / scope unclear
+2. `writing-plans` — multi-step or spec-driven
+3. `executing-plans` (TDD inside the loop)
+4. `verification-before-completion`
+5. **`security-review` if security-sensitive** *(see trigger below)*
+6. `requesting-code-review` — output uses `caveman-review` for terse review summaries
+7. `finishing-a-dev-branch` — merge / integrate
+8. Commit messages along the way: `caveman-commit`
+
+### Security review trigger (heuristic)
+
+Run `security-review` when the change touches **any** of:
+- auth / authn / authz code
+- secrets, tokens, credentials, API keys
+- crypto, signing, hashing, randomness
+- network boundaries (HTTP handlers, RPC, deserializers, webhooks)
+- input validation at trust boundaries
+- file / path handling driven by user input
+
+Skip for docs-only, test-only, UI styling, pure config. When uncertain, run it (🟡 medium cost).
+
+### Caveman variants in the lifecycle
+
+- `caveman` — always-on, all output (toggle with `stop caveman`)
+- `caveman-review` — substitute when reviewing a PR / diff (used inside `requesting-code-review` step)
+- `caveman-commit` — substitute when authoring a commit message (used at the commit step of every phase)
+
+---
+
+## Verifying the lifecycle works
+
+The phase strips are behavioral guidance — they only "work" if Claude actually walks them. Run these checks in fresh sessions (`/clear` first) to verify. Any row that fails = file an issue.
+
+| # | Phase | Test prompt | Pass criteria |
+|---|---|---|---|
+| 1 | RESEARCH | "where is `picking-model-tier` defined?" | Uses `Explore` agent or `recall_memory`; no file edits |
+| 2 | RESEARCH | "how do I write a Claude Code hook?" | Uses `claude-code-guide` agent or `context7` |
+| 3 | CONFIG | "add a new permission to my settings.json" | Invokes `update-config` skill (not direct Edit) |
+| 4 | CONFIG | "tweak my aerospace config" | Invokes `dotfiles-aerospace` |
+| 5 | DEBUG | "test X is failing intermittently" | Invokes `systematic-debugging` before guessing a fix |
+| 6 | CODE | "add feature Y to plugin Z" | Starts with `brainstorming`, then `writing-plans` |
+| 7 | CODE | "rename function `foo` to `bar` across the repo" | Skips brainstorm (mechanical), goes direct |
+| 8 | Security ON | propose change to a file containing `auth`, `token`, or `crypto` | Claude flags `security-review` before declaring done |
+| 9 | Security OFF | propose change to a `.md` doc only | Claude skips `security-review` |
+| 10 | caveman-commit | ask for a commit message | Output is terse caveman style (no fluff, fragments OK) |
+| 11 | caveman-review | ask Claude to review a diff | Review uses fragments, drops articles, no pleasantries |
+| 12 | Tier check | start a session with a handoff doc that has `## Recommended Model: sonnet` | Claude tells you to `/model sonnet` before substantive work |
+| 13 | Mid-session | ask to switch model mid-session | Claude refuses, surfaces 3 recovery options |
+
+**How to log a failure.** `gh issue create` with title `lifecycle-check #N failed: <phase> <skill>` and paste the prompt + Claude's actual first action. Don't fix it inline — capture the data first.
+
+**Recommended cadence.** Run the full checklist after every change to `plugin-routing.md`, `docs/workflow.md`, or any skill referenced in the strips. Run a spot-check (rows 1, 3, 5, 6, 8) once a week if you've been editing skills.
+
+---
+
 ## Model tier quick rule
 
 | Task | Model |
