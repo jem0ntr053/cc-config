@@ -92,6 +92,7 @@ receiving-code-review    | got review feedback              | 🟢 | no review y
 caveman-review           | reviewing PR/diff terse          | 🟢 | not reviewing
 security-review          | security-sensitive change        | 🟡 | docs only
 finishing-a-dev-branch   | impl done, integrate?            | 🟡 | mid-work
+session-debrief          | session ending, "wrap up"        | 🟢 | mid-session, trivial Q&A
 
 CONFIG / DOTFILES
 update-config            | settings.json, hooks, perms      | 🟢 | non-config edit
@@ -118,6 +119,22 @@ ScheduleWakeup           | self-paced /loop ticks           | 🟢 | non-loop
 OUTPUT COMPRESSION
 caveman:compress         | shrink CLAUDE.md / memory files  | 🟢 | small file
 ```
+
+## Guardrails-Kit Repos (deconflict)
+
+Repo CLAUDE.md has `guardrails-kit:` marker → kit routing (`TRIGGER:` lines, `docs/guardrails/` Reads) runs INSIDE whatever skill is active. Kit = per-repo floor; this file = global router. Precedence on conflict: user's explicit instruction > repo CLAUDE.md/kit rule > this file's defaults. Never suppress a kit `TRIGGER:` line to follow a phase strip — do both.
+
+## Effort Dial (per-turn, cache-free — tier stays locked per session)
+
+```
+design / debug / unknown failure   | high
+plan execution                     | medium
+mechanical edit / rename / format  | low
+```
+
+## Plans Carry Verification
+
+Every plan task ships: verify command + expected output. Supervisor tier writes plans and grades results; cheapest tier that passes the verify blocks executes. No verify block = plan not done.
 
 ## Anti-Patterns (Never)
 
