@@ -63,6 +63,7 @@ The same scan runs in CI (`.github/workflows/secret-scan.yml`) and is a required
 | `plugin-routing.md` | Canonical token-aware tool/skill routing reference. Auto-loaded by the global CLAUDE.md via `@~/.claude/plugin-routing.md`. |
 | `skills/picking-model-tier/` | Skill - session-start tier picker. Reads intent sources (handoff doc / memory / first prompt), picks tier, refuses mid-session switching. |
 | `skills/writing-handoffs/` | Skill - appends `## Recommended Model` section to handoff docs and stores a `session-handoff-…` memory entry. |
+| `skills/session-debrief/` | Skill - end-of-session ritual ("wrap up"): least-confident list, biggest-miss question, then routes to `writing-handoffs` if work continues. |
 | `hooks/precompact-context.sh` | PreCompact hook - injects MEMORY.md + CLAUDE.md into compaction context. |
 | `hooks/picking-model-tier-context.sh` | SessionStart hook - forces `picking-model-tier` to fire as the first skill of every session, ahead of brainstorming / debugging / etc. |
 | `docs/workflow.md` | Human-readable one-page playbook (companion to `plugin-routing.md` which is for Claude). |
