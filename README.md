@@ -58,6 +58,8 @@ The same scan runs in CI (`.github/workflows/secret-scan.yml`) and is a required
 
 | Path | What lives here |
 |------|-----------------|
+| `prompts/onboard-repo.md` | Per-repo onboarding prompt - paste the whole file as the first message of a fresh session at any target repo's root; sizes the repo, installs the guardrails kit, authors a project skill library. |
+| `kit/` | Guardrails kit v1.0, vendored byte-verbatim (never hand-edit; hashes in `kit/MANIFEST.sha`). Installed into target repos by `kit/MIGRATE.md`, usable standalone per `kit/README.md`. |
 | `plugin-routing.md` | Canonical token-aware tool/skill routing reference. Auto-loaded by the global CLAUDE.md via `@~/.claude/plugin-routing.md`. |
 | `skills/picking-model-tier/` | Skill - session-start tier picker. Reads intent sources (handoff doc / memory / first prompt), picks tier, refuses mid-session switching. |
 | `skills/writing-handoffs/` | Skill - appends `## Recommended Model` section to handoff docs and stores a `session-handoff-…` memory entry. |
