@@ -7,31 +7,32 @@ This repo contains config that should govern *every* Claude Code session, regard
 ## Install
 
 ```bash
+claude plugin marketplace add ~/cc-config
+claude plugin install cc-config@cc-config-marketplace
+```
+
+Plugin hooks register automatically — no settings.json wiring needed.
+
+### Migrating from symlink install
+
+After confirming the plugin fires in a fresh session (check that `picking-model-tier` / `cc-config:picking-model-tier` runs as the first skill), remove the old symlinks and manual `SessionStart` entry to avoid double-firing (hook dedup only matches identical command strings — the plugin's `${CLAUDE_PLUGIN_ROOT}` path and the old `$HOME/.claude/hooks/...` entry are different strings, so both would otherwise fire) and duplicate skills (bare name + `cc-config:`-namespaced):
+
+```bash
+rm ~/.claude/skills/picking-model-tier ~/.claude/skills/writing-handoffs ~/.claude/skills/session-debrief
+rm ~/.claude/hooks/picking-model-tier-context.sh ~/.claude/hooks/precompact-context.sh ~/.claude/plugin-routing.md
+# then remove the picking-model-tier-context.sh SessionStart entry from ~/.claude/settings.json
+```
+
+**Warning:** `~/.claude/plugin-routing.md` is `@`-imported by the user's global `CLAUDE.md`. The plugin does NOT replace that import mechanism — `plugin-routing.md` must stay reachable at that path. Do NOT remove the `plugin-routing.md` symlink above unless the global `CLAUDE.md` import is also updated to point at the repo copy instead.
+
+### Legacy symlink install
+
+```bash
 cd ~/cc-config
 bash install.sh
 ```
 
 Idempotent. Re-run after `git pull` to refresh symlinks.
-
-### Wire the SessionStart hook
-
-`install.sh` symlinks `hooks/picking-model-tier-context.sh` into `~/.claude/hooks/`, but the harness only runs it if it's registered as a `SessionStart` hook in `~/.claude/settings.json`. Add this once per machine (use the `update-config` skill in any Claude Code session, or edit settings directly):
-
-```json
-{
-  "hooks": {
-    "SessionStart": [
-      {
-        "hooks": [
-          { "type": "command", "command": "$HOME/.claude/hooks/picking-model-tier-context.sh" }
-        ]
-      }
-    ]
-  }
-}
-```
-
-Without this wiring, `picking-model-tier` falls back to description-based discovery and may lose priority to `brainstorming` / `systematic-debugging` on prompts that match those skills strongly. The hook is the durable forcing function.
 
 ## Dev setup (contributors only)
 

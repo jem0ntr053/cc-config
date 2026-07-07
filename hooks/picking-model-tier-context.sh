@@ -16,7 +16,8 @@ SESSION START - picking-model-tier pre-flight check required.
 After receiving the user's first substantive prompt, BEFORE any other action
 (including invoking other skills like brainstorming, systematic-debugging,
 writing-plans, etc., and including ALL tool calls except this one), invoke
-the picking-model-tier skill via the Skill tool:
+the picking-model-tier skill via the Skill tool (namespaced as
+cc-config:picking-model-tier when installed as a plugin):
 
   Skill({ skill: "picking-model-tier" })
 

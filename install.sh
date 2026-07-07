@@ -4,6 +4,10 @@
 
 set -euo pipefail
 
+echo "NOTE: cc-config is now also installable as a plugin (preferred):"
+echo "  claude plugin marketplace add ~/cc-config && claude plugin install cc-config@cc-config-marketplace"
+echo "Symlink install still works and continues below..."
+
 SOURCE="$(cd "$(dirname "$0")" && pwd)"
 TARGET="$HOME/.claude"
 
