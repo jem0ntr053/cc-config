@@ -1,0 +1,15 @@
+# Guardrails Kit vendor manifest
+# upstream: https://github.com/TheColliny/FableClaudeMDForOpus @ e96027da98f233458c53847e340a807e678b98f5
+# vendored: 2026-07-06 — files are byte-verbatim; NEVER hand-edit; re-vendor to upgrade
+# verify: cd kit && git hash-object --no-filters $(cut -d' ' -f2 MANIFEST.sha | grep -v '^#') — compare hashes
+992860ed4d322bb8409d348e6019fa889e7c411a CLAUDE.md
+831d91e4f7adfea1ee574f5abd9a880c463b6672 docs/guardrails/_FORMAT.md
+65c2542895a9c9b13175985702cbd2a53df38b22 docs/guardrails/CODE.md
+e3edc7baba5eefe0e73f4f08a6d6840e1ec38a33 docs/guardrails/DEBUG.md
+ca31f598e5b4d2b2925f059d7b58e256a7021a38 docs/guardrails/EFFICIENCY.md
+ae17b8e12e047d890a4d3ea7205d5a74801e2047 docs/guardrails/PLAN.md
+9feacdfadfbf24b20c57c612bccdd07c4f6bc65b docs/guardrails/SESSION.md
+6ac22082de76ba5d51a8c36a7041f6d8809d14d7 docs/guardrails/TRAPS.md
+d13f688ec24f4e2d3f563783388d8a4b1e60d591 docs/guardrails/VERIFY.md
+241739a826b9fbf50e314ce908a10a34597aa630 MIGRATE.md
+5f2bbb22d90cecdca30ad4d627794f64cb6527cf README.md
