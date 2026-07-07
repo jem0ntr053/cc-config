@@ -33,7 +33,7 @@ automem recall_memory    | session start                    | 🟢 | offline
 gh issue list            | session start (issues canonical) | 🟢 | offline
 LSP (swift/pyright/lua)  | matching file edits              | 🟢 | non-matching lang
 picking-model-tier       | session start (intent-sourced)   | 🟢 | mid-session, chitchat
-auto-memory write        | learn user fact / feedback / project state / ext reference | 🟢 | derivable from code
+auto-memory write        | user fact/feedback/state/ext-ref | 🟢 | derivable from code
 
 INTAKE / RESEARCH
 context7 query-docs      | lib/framework/SDK/API question   | 🟡 | general concept
@@ -52,6 +52,7 @@ TDD                      | feature/bugfix w/ testable logic | 🟡 | UI polish, 
 subagent-driven-dev      | independent parallel tasks       | 🔴 | sequential / trivial
 dispatching-parallel-agents | 2+ no-shared-state tasks      | 🔴 | shared state
 using-git-worktrees      | risky/long branch isolation      | 🟡 | small edit
+
 DEBUG
 systematic-debugging     | bug / test fail / wrong output   | 🟡 | obvious typo
 
@@ -77,13 +78,16 @@ recall_memory            | resume context, prior decisions  | 🟢 | unrelated t
 store_memory             | new decision/pref/incident       | 🟢 | derivable info
 update_memory            | correct stale memory             | 🟢 | new fact
 delete_memory            | wrong/outdated entry             | 🟢 | still valid
+
 COMMITS & PRs
 caveman-commit           | writing commit msg               | 🟢 | not committing
 review                   | reviewing GitHub PR              | 🔴 | own diff
+
 SCHEDULING
 loop                     | recurring poll / interval        | 🟡 | one-shot
 schedule                 | future-dated cleanup / cron      | 🟡 | now-task
 ScheduleWakeup           | self-paced /loop ticks           | 🟢 | non-loop
+
 OUTPUT COMPRESSION
 caveman:compress         | shrink CLAUDE.md / memory files  | 🟢 | small file
 ```
