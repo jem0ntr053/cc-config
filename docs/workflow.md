@@ -184,6 +184,15 @@ The phase strips are behavioral guidance — they only "work" if Claude actually
 
 ---
 
+## cc-config plugin maintenance (going forward)
+
+- This machine runs cc-config as a **plugin** (migrated 2026-07-06). After any `git pull` in `~/cc-config`: `claude plugin marketplace update cc-config-marketplace && claude plugin update cc-config`, then restart Claude Code.
+- Bump `version` in `.claude-plugin/plugin.json` on every merged change to `skills/` or `hooks/`.
+- Other machines: follow README "Install" + "Migrating from symlink install" (in that order; fresh-session check before deleting symlinks).
+- `~/.claude/plugin-routing.md` symlink stays until the global `CLAUDE.md` `@import` is repointed — do not delete it casually.
+
+---
+
 ## Model tier quick rule
 
 | Task | Model |
