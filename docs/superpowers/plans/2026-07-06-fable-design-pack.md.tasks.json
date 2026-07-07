@@ -1,0 +1,40 @@
+{
+  "planPath": "docs/superpowers/plans/2026-07-06-fable-design-pack.md",
+  "tasks": [
+    {
+      "id": 1,
+      "subject": "Task 1: session-debrief skill",
+      "status": "completed",
+      "description": "**Goal:** End-of-session ritual (least-confident, biggest-miss, handoff routing) as invocable skill.\n\n**Files:** Create skills/session-debrief/SKILL.md; Modify install.sh\n\n**Verify:** bash install.sh && readlink ~/.claude/skills/session-debrief -> repo path\n\n```json:metadata\n{\"files\": [\"skills/session-debrief/SKILL.md\", \"install.sh\"], \"verifyCommand\": \"bash install.sh && readlink ~/.claude/skills/session-debrief\", \"acceptanceCriteria\": [\"skill file with trigger-rich frontmatter\", \"install.sh symlinks it, idempotent\"]}\n```"
+    },
+    {
+      "id": 2,
+      "subject": "Task 2: plugin-routing.md additions",
+      "status": "completed",
+      "blockedBy": [1],
+      "description": "**Goal:** Kit deconflict section, effort-dial defaults, plans-carry-verification rule, session-debrief trigger row.\n\n**Files:** Modify plugin-routing.md\n\n**Verify:** grep -c \"session-debrief\\|Guardrails-Kit Repos\\|Effort Dial\\|Plans Carry Verification\" plugin-routing.md -> >=4\n\n```json:metadata\n{\"files\": [\"plugin-routing.md\"], \"verifyCommand\": \"grep -c 'session-debrief\\\\|Guardrails-Kit Repos\\\\|Effort Dial\\\\|Plans Carry Verification' plugin-routing.md\", \"acceptanceCriteria\": [\"deconflict precedence stated\", \"effort table present\", \"verification rule present\", \"debrief row present\"]}\n```"
+    },
+    {
+      "id": 3,
+      "subject": "Task 3: plugin-routing.md compression pass",
+      "status": "completed",
+      "blockedBy": [2],
+      "description": "**Goal:** <=110 lines, zero semantic loss, line-accounting in PR description.\n\n**Files:** Modify plugin-routing.md\n\n**Verify:** wc -l plugin-routing.md <=110 AND skill-name presence loop prints nothing MISSING\n\n```json:metadata\n{\"files\": [\"plugin-routing.md\"], \"verifyCommand\": \"wc -l plugin-routing.md\", \"acceptanceCriteria\": [\"<=110 lines\", \"every removed line accounted DUPLICATE or DECORATION\", \"all lifecycle-check skills still present\"]}\n```"
+    },
+    {
+      "id": 4,
+      "subject": "Task 4: workflow.md updates",
+      "status": "completed",
+      "blockedBy": [3],
+      "description": "**Goal:** Lifecycle-check rows 14-16, finishing-table debrief step, kit/prompt location rows.\n\n**Files:** Modify docs/workflow.md\n\n**Verify:** grep -c \"session-debrief\\|onboard-repo\\|kit/\" docs/workflow.md -> >=4\n\n```json:metadata\n{\"files\": [\"docs/workflow.md\"], \"verifyCommand\": \"grep -c 'session-debrief\\\\|onboard-repo\\\\|kit/' docs/workflow.md\", \"acceptanceCriteria\": [\"rows 14-16 added\", \"finishing step 6 added\", \"locations table updated\"]}\n```"
+    },
+    {
+      "id": 5,
+      "subject": "Task 5: plugin conversion",
+      "status": "completed",
+      "blockedBy": [4],
+      "description": "**Goal:** cc-config installs as a plugin; hooks auto-register; install.sh deprecated.\n\n**Files:** Create .claude-plugin/plugin.json, .claude-plugin/marketplace.json, hooks/hooks.json; Modify README.md, install.sh\n\n**Verify:** fresh session -> picking-model-tier pre-flight fires with no manual settings.json SessionStart entry; skills listed as cc-config:*\n\n**Steps:** Step 0 MANDATORY: confirm plugin schema via claude-code-guide agent before writing JSON.\n\n```json:metadata\n{\"files\": [\".claude-plugin/plugin.json\", \".claude-plugin/marketplace.json\", \"hooks/hooks.json\", \"README.md\", \"install.sh\"], \"verifyCommand\": \"claude plugin validate .\", \"acceptanceCriteria\": [\"validate passes\", \"install from local marketplace works\", \"no double-fire of hooks\", \"reference sweep done\"]}\n```"
+    }
+  ],
+  "lastUpdated": "2026-07-06"
+}

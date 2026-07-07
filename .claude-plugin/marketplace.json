@@ -1,0 +1,12 @@
+{
+  "name": "cc-config-marketplace",
+  "owner": { "name": "jem0ntr053" },
+  "description": "Single-plugin marketplace for cc-config - personal cross-project Claude Code workflow",
+  "plugins": [
+    {
+      "name": "cc-config",
+      "source": "./",
+      "description": "Personal cross-project workflow: model-tier pre-flight, handoffs, session debrief, token-aware routing"
+    }
+  ]
+}

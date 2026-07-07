@@ -1,48 +1,19 @@
 # Plugin Routing Reference
 
-Canonical token-aware routing. Pick the right tool for the phase. Cheap calls first, heavy workflows only when warranted.
-
-**Audience:** Claude (auto-loaded). Human-readable companion: `docs/workflow.md`.
-
-Legend: 🟢 cheap/free · 🟡 medium · 🔴 heavy
+Canonical token-aware routing. Cheap calls first; heavy workflows only when warranted. **Audience:** Claude (auto-loaded). Human companion: `docs/workflow.md`. Legend: 🟢 cheap · 🟡 medium · 🔴 heavy.
 
 ## Phase Strips (lifecycle order)
 
-Each step names the **specific** skill / agent / tool to invoke. `[brackets]` = conditional. `*` = see footnote.
+`[brackets]` = conditional. `*` = security-review footnote. Per-step detail: Trigger Table below.
 
 ```
-RESEARCH:  recall_memory → context7 query-docs / Explore-agent / claude-code-guide-agent → answer (no code)
-
-CONFIG:    picking-model-tier → update-config OR direct-edit → verification-before-completion
-           → store_memory (if novel) → [commit: caveman-commit]
-
-DEBUG:     systematic-debugging → reproduce → root-cause → fix → [security-review *]
-           → verification-before-completion → [commit: caveman-commit]
-
-CODE:      brainstorming → writing-plans → executing-plans (TDD inside)
-           → verification-before-completion → [security-review *]
-           → requesting-code-review (caveman-review on output) → finishing-a-dev-branch
-           → [commit: caveman-commit]
+RESEARCH: recall_memory → context7 / Explore-agent / claude-code-guide-agent → answer (no code)
+CONFIG:   picking-model-tier → update-config OR direct-edit → verification-before-completion → [store_memory] → [caveman-commit]
+DEBUG:    systematic-debugging → reproduce → root-cause → fix → [security-review *] → verification-before-completion → [caveman-commit]
+CODE:     brainstorming → writing-plans → executing-plans (TDD) → verification-before-completion → [security-review *] → requesting-code-review (caveman-review) → finishing-a-dev-branch → [caveman-commit]
 ```
 
-**\* security-review trigger (heuristic, not always-run).** Invoke `security-review` when the change touches any of:
-- auth / authn / authz code paths
-- secrets, tokens, credentials, API keys
-- crypto, signing, hashing, randomness
-- network boundaries (HTTP handlers, RPC, deserializers, webhooks)
-- input validation at any trust boundary
-- file / path handling driven by user input
-
-Skip for docs-only, test-only, UI styling, and pure config that does not touch the above. When in doubt, run it — `security-review` is 🟡 medium cost.
-
-## Always-On Defaults (auto, no invocation)
-
-- caveman mode - terse output (until "stop caveman")
-- automem recall_memory - session start
-- gh issue list - session start (open work tracked in GitHub issues, not markdown)
-- LSP (swift / pyright / lua) - auto on matching file edits
-- picking-model-tier - starting any new task
-- auto-memory writes - learn user fact / feedback / project state / external reference
+**\* security-review trigger** (heuristic, not always-run). Invoke when the change touches: auth/authn/authz; secrets/tokens/credentials/API keys; crypto/signing/hashing/randomness; network boundaries (HTTP handlers, RPC, deserializers, webhooks); input validation at any trust boundary; file/path handling driven by user input. Skip for docs-only, test-only, UI styling, pure config not touching the above. When in doubt, run it (🟡).
 
 ## Skip Rules
 
@@ -56,12 +27,13 @@ Skip for docs-only, test-only, UI styling, and pure config that does not touch t
 ```
 Skill | When to use | Cost | When to skip
 
-ALWAYS-ON
+ALWAYS-ON (auto, no invocation)
 caveman mode             | terse every reply                | 🟢 | "stop caveman"
 automem recall_memory    | session start                    | 🟢 | offline
+gh issue list            | session start (issues canonical) | 🟢 | offline
 LSP (swift/pyright/lua)  | matching file edits              | 🟢 | non-matching lang
 picking-model-tier       | session start (intent-sourced)   | 🟢 | mid-session, chitchat
-auto-memory write        | learn user fact / feedback       | 🟢 | derivable from code
+auto-memory write        | user fact/feedback/state/ext-ref | 🟢 | derivable from code
 
 INTAKE / RESEARCH
 context7 query-docs      | lib/framework/SDK/API question   | 🟡 | general concept
@@ -92,6 +64,7 @@ receiving-code-review    | got review feedback              | 🟢 | no review y
 caveman-review           | reviewing PR/diff terse          | 🟢 | not reviewing
 security-review          | security-sensitive change        | 🟡 | docs only
 finishing-a-dev-branch   | impl done, integrate?            | 🟡 | mid-work
+session-debrief          | session ending, "wrap up"        | 🟢 | mid-session, trivial Q&A
 
 CONFIG / DOTFILES
 update-config            | settings.json, hooks, perms      | 🟢 | non-config edit
@@ -118,6 +91,18 @@ ScheduleWakeup           | self-paced /loop ticks           | 🟢 | non-loop
 OUTPUT COMPRESSION
 caveman:compress         | shrink CLAUDE.md / memory files  | 🟢 | small file
 ```
+
+## Guardrails-Kit Repos (deconflict)
+
+Repo CLAUDE.md has `guardrails-kit:` marker → kit routing (`TRIGGER:` lines, `docs/guardrails/` Reads) runs INSIDE whatever skill is active. Kit = per-repo floor; this file = global router. Precedence on conflict: user's explicit instruction > repo CLAUDE.md/kit rule > this file's defaults. Never suppress a kit `TRIGGER:` line to follow a phase strip — do both.
+
+## Effort Dial (reasoning-effort per turn — NOT a /model tier switch; picking-model-tier locks tier per session)
+
+design/debug/unknown-failure → high · plan execution → medium · mechanical edit/rename/format → low
+
+## Plans Carry Verification
+
+Every plan task ships: verify command + expected output. The session's picked tier (per picking-model-tier, usually opus) writes plans and grades results; the cheapest tier that passes the verify blocks executes. No verify block = plan not done.
 
 ## Anti-Patterns (Never)
 

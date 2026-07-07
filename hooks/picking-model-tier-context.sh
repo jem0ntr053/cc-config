@@ -18,7 +18,9 @@ After receiving the user's first substantive prompt, BEFORE any other action
 writing-plans, etc., and including ALL tool calls except this one), invoke
 the picking-model-tier skill via the Skill tool:
 
-  Skill({ skill: "picking-model-tier" })
+  Skill({ skill: "picking-model-tier" })  — if that name is not in the
+  available-skills list (plugin install), use
+  Skill({ skill: "cc-config:picking-model-tier" }) instead.
 
 This is the FIRST thing you do every session. Non-negotiable. The skill
 will read intent sources (handoff doc / memory / first prompt), pick a tier,

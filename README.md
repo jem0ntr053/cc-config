@@ -7,31 +7,41 @@ This repo contains config that should govern *every* Claude Code session, regard
 ## Install
 
 ```bash
+git clone https://github.com/jem0ntr053/cc-config.git ~/cc-config
+claude plugin marketplace add ~/cc-config
+claude plugin install cc-config@cc-config-marketplace
+```
+
+`~/cc-config` is just a chosen path, not a tooling requirement — clone anywhere and pass that path to `marketplace add`. Clone-free alternative: `claude plugin marketplace add` also accepts a GitHub repo (`jem0ntr053/cc-config`) or git URL directly; use the git/GitHub-repo form, NOT a raw URL to `marketplace.json` — the raw-URL form silently breaks the relative `"source": "./"` plugin entry.
+
+Plugin hooks register automatically — no settings.json wiring needed.
+
+To refresh after `git pull`: `claude plugin marketplace update cc-config-marketplace && claude plugin update cc-config` (restart Claude Code to apply).
+
+Bump `version` in `.claude-plugin/plugin.json` on every merged change to `skills/` or `hooks/`; `claude plugin tag` can stamp releases.
+
+### Migrating from symlink install
+
+After confirming the plugin fires in a fresh session (check that `picking-model-tier` / `cc-config:picking-model-tier` runs as the first skill), remove the old symlinks and manual `SessionStart` entry to avoid double-firing (hook dedup only matches identical command strings — the plugin's `${CLAUDE_PLUGIN_ROOT}` path and the old `$HOME/.claude/hooks/...` entry are different strings, so both would otherwise fire) and duplicate skills (bare name + `cc-config:`-namespaced).
+
+**Warning:** `~/.claude/plugin-routing.md` is `@`-imported by the user's global `CLAUDE.md`. The plugin does NOT replace that import mechanism — `plugin-routing.md` must stay reachable at that path. Do NOT remove the `plugin-routing.md` symlink unless the global `CLAUDE.md` import is also updated to point at the repo copy instead.
+
+```bash
+rm ~/.claude/skills/picking-model-tier ~/.claude/skills/writing-handoffs ~/.claude/skills/session-debrief
+rm ~/.claude/hooks/picking-model-tier-context.sh ~/.claude/hooks/precompact-context.sh
+# then remove the picking-model-tier-context.sh SessionStart entry from ~/.claude/settings.json
+```
+
+Separate manual step (only after updating the global `CLAUDE.md` import per the warning above): `rm ~/.claude/plugin-routing.md`.
+
+### Legacy symlink install
+
+```bash
 cd ~/cc-config
 bash install.sh
 ```
 
 Idempotent. Re-run after `git pull` to refresh symlinks.
-
-### Wire the SessionStart hook
-
-`install.sh` symlinks `hooks/picking-model-tier-context.sh` into `~/.claude/hooks/`, but the harness only runs it if it's registered as a `SessionStart` hook in `~/.claude/settings.json`. Add this once per machine (use the `update-config` skill in any Claude Code session, or edit settings directly):
-
-```json
-{
-  "hooks": {
-    "SessionStart": [
-      {
-        "hooks": [
-          { "type": "command", "command": "$HOME/.claude/hooks/picking-model-tier-context.sh" }
-        ]
-      }
-    ]
-  }
-}
-```
-
-Without this wiring, `picking-model-tier` falls back to description-based discovery and may lose priority to `brainstorming` / `systematic-debugging` on prompts that match those skills strongly. The hook is the durable forcing function.
 
 ## Dev setup (contributors only)
 
