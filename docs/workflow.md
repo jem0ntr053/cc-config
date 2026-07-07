@@ -47,7 +47,7 @@ Don't try to plan more than one issue at once.
 | 3. PR | `gh pr create` (no "Generated with Claude Code" line) |
 | 4. Merge | `gh pr merge <#> --squash --delete-branch` |
 | 5. Sync | `git checkout main && git pull` |
-| 6. Debrief | say "wrap up" — `session-debrief` audits confidence, routes to handoff |
+| 6. Debrief | say "wrap up" — `session-debrief` audits confidence, routes to handoff (a BLOCKER here can reopen an issue — merged ≠ immune) |
 
 ---
 
@@ -175,7 +175,7 @@ The phase strips are behavioral guidance — they only "work" if Claude actually
 | 12 | Tier check | start a session with a handoff doc that has `## Recommended Model: sonnet` | Claude tells you to `/model sonnet` before substantive work |
 | 13 | Mid-session | ask to switch model mid-session | Claude refuses, surfaces 3 recovery options |
 | 14 | Debrief | say "wrap up" at the end of a work session | `session-debrief` fires: least-confident list + biggest-miss + handoff routing |
-| 15 | Kit coexistence | start a session in a repo whose CLAUDE.md has the `guardrails-kit:` marker | kit `TRIGGER:` lines fire AND superpowers skills still invoke; no contradictory instructions |
+| 15 | Kit coexistence | start a session in a repo whose CLAUDE.md has the `guardrails-kit:` marker | kit `TRIGGER:` lines fire AND superpowers skills still invoke; neither suppresses or overrides the other |
 | 16 | Onboarding prompt | paste `~/cc-config/prompts/onboard-repo.md` in a scratch repo | Phase 0 classifier runs; `VERIFICATION 0` block pasted before any discovery |
 
 **How to log a failure.** `gh issue create` with title `lifecycle-check #N failed: <phase> <skill>` and paste the prompt + Claude's actual first action. Don't fix it inline — capture the data first.
