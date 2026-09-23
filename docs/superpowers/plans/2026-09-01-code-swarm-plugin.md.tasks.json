@@ -1,0 +1,78 @@
+{
+  "planPath": "docs/superpowers/plans/2026-09-01-code-swarm-plugin.md",
+  "tasks": [
+    {
+      "id": 0,
+      "subject": "Task 1: Scaffold code-swarm plugin and parameterize swarm.js",
+      "status": "pending",
+      "description": "**Goal:** code-swarm plugin in cc-config marketplace with 10 generic agents + a swarm.js whose AutoCrate constants come from args.config.\n\n**Files:** /Users/montrose/cc-config/code-swarm/.claude-plugin/plugin.json (create); .claude-plugin/marketplace.json (append entry); code-swarm/skills/swarm/swarm.js (parameterized copy); code-swarm/agents/*.md (copy 10 generic)\n\n**Verify:** node --check code-swarm/skills/swarm/swarm.js && echo OK\n\n```json:metadata\n{\"files\": [\"/Users/montrose/cc-config/code-swarm/.claude-plugin/plugin.json\", \"/Users/montrose/cc-config/.claude-plugin/marketplace.json\", \"/Users/montrose/cc-config/code-swarm/skills/swarm/swarm.js\"], \"verifyCommand\": \"node --check /Users/montrose/cc-config/code-swarm/skills/swarm/swarm.js && echo OK\", \"acceptanceCriteria\": [\"code-swarm listed in cc-config marketplace\", \"no AutoCrate literals in swarm.js\", \"node --check passes\"]}\n```"
+    },
+    {
+      "id": 1,
+      "subject": "Task 2: .swarm.json schema + /swarm pre-flight loader",
+      "status": "pending",
+      "blockedBy": [
+        0
+      ],
+      "description": "**Goal:** Repo opts in with minimal .swarm.json; /swarm reads+validates it, refuses writes unless armed:true, passes config into the Workflow.\n\n**Files:** code-swarm/skills/swarm/SKILL.md (create); code-swarm/skills/swarm/swarm.schema.json (create)\n\n**Verify:** test -f code-swarm/skills/swarm/swarm.schema.json && echo OK\n\n```json:metadata\n{\"files\": [\"/Users/montrose/cc-config/code-swarm/skills/swarm/SKILL.md\", \"/Users/montrose/cc-config/code-swarm/skills/swarm/swarm.schema.json\"], \"verifyCommand\": \"test -f /Users/montrose/cc-config/code-swarm/skills/swarm/swarm.schema.json && echo OK\", \"acceptanceCriteria\": [\"pre-flight resolves repo root and reads .swarm.json\", \"non-dry/audit run refused unless armed:true\", \"Workflow launch passes config\"]}\n```"
+    },
+    {
+      "id": 2,
+      "subject": "Task 3: Decouple generic agents from AutoCrate specifics",
+      "status": "pending",
+      "blockedBy": [
+        0
+      ],
+      "description": "**Goal:** Agents read the injected CONFIG block (test cmd, branch, conventions, SCA) instead of hardcoded .venv/pytest/bandit/autocrate-conventions.\n\n**Files:** code-swarm/agents/{issue-implementer,pr-verifier,security-auditor,docs-syncer,issue-triager}.md\n\n**Verify:** ! grep -rEln '\\.venv/bin/activate|python3 -m pytest|autocrate-conventions|PYTHONPATH=src' code-swarm/agents/ && echo CLEAN\n\n```json:metadata\n{\"files\": [\"/Users/montrose/cc-config/code-swarm/agents/issue-implementer.md\", \"/Users/montrose/cc-config/code-swarm/agents/pr-verifier.md\", \"/Users/montrose/cc-config/code-swarm/agents/security-auditor.md\", \"/Users/montrose/cc-config/code-swarm/agents/docs-syncer.md\", \"/Users/montrose/cc-config/code-swarm/agents/issue-triager.md\"], \"verifyCommand\": \"! grep -rEln '\\\\.venv/bin/activate|python3 -m pytest|autocrate-conventions|PYTHONPATH=src' /Users/montrose/cc-config/code-swarm/agents/ && echo CLEAN\", \"acceptanceCriteria\": [\"no hardcoded venv/pytest/bandit/autocrate refs\", \"agents reference CONFIG block for test/sca/conventions\"]}\n```"
+    },
+    {
+      "id": 3,
+      "subject": "Task 4: Onboard daily-operating-system, prove dry-run",
+      "status": "pending",
+      "blockedBy": [
+        1,
+        2
+      ],
+      "description": "**Goal:** dayos opts in with .swarm.json (unarmed); /swarm --dry-run from the plugin triages its issues with zero writes; non-dry run refused.\n\n**Files:** /Users/montrose/Developer/GitRepositories/daily-operating-system/.swarm.json (create)\n\n**Verify:** cd daily-operating-system && git status --porcelain | grep -v '^??' | wc -l  -> 0 after dry-run\n\n```json:metadata\n{\"files\": [\"/Users/montrose/Developer/GitRepositories/daily-operating-system/.swarm.json\"], \"verifyCommand\": \"cd /Users/montrose/Developer/GitRepositories/daily-operating-system && git status --porcelain | grep -v '^??' | wc -l\", \"acceptanceCriteria\": [\"validates, armed:false\", \"dry-run triages issues, tree clean, labels unchanged\", \"armed gate refuses non-dry run\"]}\n```"
+    },
+    {
+      "id": 4,
+      "subject": "Task 5 (v1.1): Nightly inspect-only run + ntfy digest",
+      "status": "pending",
+      "blockedBy": [
+        3
+      ],
+      "description": "**Goal:** launchd nightly runs /swarm --dry-run --audit across allowlisted repos, files findings, one ntfy digest, never writes code.\n\n**Files:** code-swarm/scripts/swarm_nightly.sh (create); ~/Library/LaunchAgents/com.montrose.swarm-nightly.plist (create)\n\n**Verify:** bash -n code-swarm/scripts/swarm_nightly.sh && echo OK\n\n```json:metadata\n{\"files\": [\"/Users/montrose/cc-config/code-swarm/scripts/swarm_nightly.sh\", \"~/Library/LaunchAgents/com.montrose.swarm-nightly.plist\"], \"verifyCommand\": \"bash -n /Users/montrose/cc-config/code-swarm/scripts/swarm_nightly.sh && echo OK\", \"acceptanceCriteria\": [\"discovers opted-in repos, audit+dry-run headless\", \"one ntfy digest\", \"never armed, trees clean\"]}\n```"
+    },
+    {
+      "id": 5,
+      "subject": "Task 6 (v1.1): Migrate AutoCrate onto the plugin",
+      "status": "pending",
+      "blockedBy": [
+        3,
+        6,
+        7
+      ],
+      "description": "**Goal:** AutoCrate uses plugin swarm via .swarm.json; inline generic swarm deleted, 4 domain agents kept; /swarm --dry-run green on AutoCrate.\n\n**Files:** AutoCrate/.swarm.json (create); delete AutoCrate/.claude/skills/swarm + 10 generic agents\n\n**Verify:** ls AutoCrate/.claude/agents/ | wc -l -> 4; dry-run leaves tree clean\n\n```json:metadata\n{\"files\": [\"/Users/montrose/Developer/GitRepositories/AutoCrate/.swarm.json\"], \"verifyCommand\": \"ls /Users/montrose/Developer/GitRepositories/AutoCrate/.claude/agents/ | wc -l\", \"acceptanceCriteria\": [\"AutoCrate .swarm.json armed:true with real values\", \"4 domain agents remain, 10 generic gone\", \"plugin dry-run green, tree clean\", \"deletion set confirmed with user first\"]}\n```"
+    },
+    {
+      "id": 6,
+      "subject": "Task 7 (v1.2): product-planner agent + /swarm --build",
+      "status": "pending",
+      "blockedBy": [
+        3
+      ],
+      "description": "**Goal:** 1-4 sentence prompt -> docs/specs/<date>-<slug>.md on spec/<slug> branch + PR, one unlabeled issue-ready issue per feature; no code; human labels agent-ready.\n\n**Files:** code-swarm/agents/product-planner.md (create); code-swarm/agents/issue-groomer.md (build mode); code-swarm/skills/swarm/swarm.js (build mode + PLAN_SCHEMA); code-swarm/skills/swarm/SKILL.md (--build flag)\n\n**Verify:** node --check code-swarm/skills/swarm/swarm.js && grep -c build code-swarm/skills/swarm/SKILL.md\n\n```json:metadata\n{\"files\": [\"/Users/montrose/cc-config/code-swarm/agents/product-planner.md\", \"/Users/montrose/cc-config/code-swarm/agents/issue-groomer.md\", \"/Users/montrose/cc-config/code-swarm/skills/swarm/swarm.js\", \"/Users/montrose/cc-config/code-swarm/skills/swarm/SKILL.md\"], \"verifyCommand\": \"node --check /Users/montrose/cc-config/code-swarm/skills/swarm/swarm.js && echo OK\", \"acceptanceCriteria\": [\"planner forbids low-level detail, requires features+stories+data model+tech design\", \"--build refused without .swarm.json or when slug exists; armed not required\", \"issues filed unlabeled, never agent-ready\", \"node --check passes\"]}\n```"
+    },
+    {
+      "id": 7,
+      "subject": "Task 8 (v1.2): app evaluator lens in pr-verifier",
+      "status": "pending",
+      "blockedBy": [
+        3
+      ],
+      "description": "**Goal:** With .swarm.json app block, pr-verifier starts the app in the worktree and drives it with Playwright against every brief test + acceptance line; any FAIL -> changes_requested. No app block -> unchanged.\n\n**Files:** code-swarm/skills/swarm/swarm.schema.json (app block); code-swarm/agents/pr-verifier.md (lens); code-swarm/skills/swarm/SKILL.md + swarm.js (plumb app into CONV)\n\n**Verify:** jq -e .properties.app.properties.start_cmd swarm.schema.json && grep -c 'app:' pr-verifier.md >= 3\n\n```json:metadata\n{\"files\": [\"/Users/montrose/cc-config/code-swarm/skills/swarm/swarm.schema.json\", \"/Users/montrose/cc-config/code-swarm/agents/pr-verifier.md\", \"/Users/montrose/cc-config/code-swarm/skills/swarm/SKILL.md\", \"/Users/montrose/cc-config/code-swarm/skills/swarm/swarm.js\"], \"verifyCommand\": \"jq -e '.properties.app.properties.start_cmd' /Users/montrose/cc-config/code-swarm/skills/swarm/swarm.schema.json >/dev/null && echo OK\", \"acceptanceCriteria\": [\"schema app block optional with start_cmd,url,ready_wait_s\", \"CONV carries app line or skip line\", \"verifier lens: PID via port, webapp-testing skill, skeptic rules, binary threshold, app: reasons\", \"start failure or missing skill -> changes_requested\"]}\n```"
+    }
+  ],
+  "lastUpdated": "2026-09-23"
+}
