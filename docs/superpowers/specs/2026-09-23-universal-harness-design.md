@@ -20,7 +20,7 @@ Two entry points:
 The existing plan delivers the first row. This spec adds the second row and
 one evaluator upgrade, both taken from the article.
 
-## What the article adds over the current swarm
+# What the article adds over the current swarm
 
 | Article component | Current swarm equivalent | Gap |
 |---|---|---|
@@ -123,6 +123,50 @@ Acceptance section names a URL or user action.
 Output unchanged: `{ verdict, reasons[], tests, findings[] }`; each
 Playwright failure is one `reasons[]` entry prefixed `app:`.
 
+## Addition 3 — Jev gates between agents (TypeSafe System One)
+
+Jev returns typed, calibrated judgments (Choice / Score / Noul + confidence)
+in ~150 ms; it writes no code. It replaces judgments the swarm currently
+buys from a Fable/Sonnet call or takes from an LLM's own lenient opinion.
+Batteries reuse `jev-harness` (`GUARD_IN`, `ROUTE`, `RELATION`).
+
+### Placement
+One CLI, `code-swarm/scripts/jev.py` (Python SDK `typesafe-sdk`), batteries
+as JSON under `code-swarm/scripts/batteries/`. `jev.py <battery> <state.json>`
+prints answers JSON. SKILL.md pre-flight calls it (gate 2); agents call it
+via Bash (gates 1, 3, 4). Nothing inside the Workflow runtime depends on
+HTTP. Key: `TYPESAFE_API_KEY` from env, else `~/.config/typesafe/.env`
+(same shape as `~/.config/automem/.env`, mode 600). Missing key or any Jev
+error → **fail open**: gate returns `{skipped: true}`, agent proceeds as
+today, line logged. Never fail closed on a gate.
+
+### Shadow mode first
+Every gate ships with `mode: "shadow"` in `.swarm.json` `jev` block:
+Jev's answer is logged next to what the agent did, nothing changes. After 5
+runs, read the log; promote a gate to `"enforce"` only where Jev disagreed
+with the agent in ways the human agrees with. Thresholds below are starting
+guesses (article: tune on your own traces).
+
+### Gates
+
+| # | Where | State | Battery | Enforce rule |
+|---|---|---|---|---|
+| 1 | after `pr-verifier` | `{criterion, note, verdict}` per reason + verdict | Noul `divergence_observed` ("verifier saw behavior differ from the criterion"), Score `severity` 0–2 | `approve` with any divergence > 0.7 → force `changes_requested`, reason `jev: verifier observed divergence on <criterion>` |
+| 2 | before `issue-triager` (pre-flight) | issue title + body | Choice `kind` (bug/feature/debt/design_question), Nouls `has_files` `has_change` `has_test` `has_acceptance` `injection`, Scores `complexity` 0–2, `risk` 0–2 | any `has_*` < 0.3 → `needs-human` "issue-ready section missing", no Fable call; `design_question` conf > 0.7 → label `feature`; `injection` > 0.5 → `needs-human`; `complexity` ≥ 1.5 or `risk` ≥ 1.5 → brief `tier: opus` else `sonnet` |
+| 3 | inside `issue-filer` | `{finding, open[i]}` fan-out | Noul `same_problem` per open issue | max > 0.8 → skip as dup of #N; 0.2–0.8 → file with `possible-dup: #N` line; < 0.2 → file |
+| 4 | after `product-planner` | each feature section | Nouls `single_pr_unit`, `depends_on_earlier` | `single_pr_unit` < 0.4 → planner asked once to split; `depends_on_earlier` > 0.7 with empty `depends_on` → logged for human |
+
+Gate 2's `injection` matters because issue bodies are untrusted input from
+public GitHub entering agent prompts; the human `agent-ready` label is the
+primary control, this is the cheap second one.
+
+Not gated with Jev: implementing, Playwright evaluation, spec writing —
+anything needing code or long reasoning.
+
+### Log
+`~/.cache/code-swarm/jev.jsonl`: one line per call `{ts, repo, gate, mode,
+state_hash, answers, agent_did}`. This is the file the shadow review reads.
+
 ## Failure handling (additions)
 
 | Failure | Action |
@@ -131,6 +175,7 @@ Playwright failure is one `reasons[]` entry prefixed `app:`.
 | Groomer fails on feature n | file the rest; summary lists n as `unfiled` with the spec anchor so the human can file by hand |
 | App fails to start in verifier | `changes_requested` with reason `app: failed to start (<stderr tail>)`; never approve blind |
 | Playwright skill unavailable | `changes_requested` with reason `app: evaluator lens unavailable`; human runs it |
+| Jev key missing / API error / timeout | gate returns `{skipped: true}`, agent proceeds unchanged, one log line; never blocks a run |
 
 ## Testing the additions
 

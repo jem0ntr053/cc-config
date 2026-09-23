@@ -14,6 +14,7 @@
 - **v1 (prove it):** Task 1–4 — plugin scaffolded, config-driven, dayos onboarded and dry-run-green.
 - **v1.1:** Task 5 (nightly inspect-only) + Task 6 (migrate AutoCrate off its inline swarm).
 - **v1.2 (article additions, spec `2026-09-23-universal-harness-design.md`):** Task 7 (`product-planner` + `--build`) + Task 8 (`app` evaluator lens in `pr-verifier`). Both depend on Task 4 only; run before Task 6 so AutoCrate migrates onto the finished plugin.
+- **v1.3 (Jev gates, spec Addition 3):** Task 9 — `jev.py` CLI + batteries + gates 1–4 in shadow mode. Depends on Tasks 4, 7, 8 (gates 1 and 4 hook agents those tasks produce).
 
 **Non-goals (deferred):** a generic performance agent (AutoCrate's is domain-bound; generic perf comes via the user's `simplify`/`code-review` skills in `pr-verifier`'s over-engineering lens); arming any repo the user does not own (e.g. upstream `automem`); auto-merge (never).
 
@@ -681,6 +682,78 @@ git commit -m "feat(code-swarm): live-app evaluator lens in pr-verifier"
 - [ ] **Step 5: Prove the lens both ways**
 
 Pick a web repo with `.swarm.json`; add `app`. Use an issue whose acceptance is a button the implementation deliberately leaves unwired. `/swarm --issue N` → verifier `changes_requested` with an `app:` reason and screenshot path. Remove `app` → rerun → approves on tests alone. Record both PR comment URLs below this step.
+
+---
+
+### Task 9 (v1.3): Jev gates — `jev.py`, batteries, shadow mode
+
+**Goal:** Four cheap calibrated gates (spec Addition 3) run in shadow mode around the swarm's agents, logging Jev's judgment beside what the agent did. No gate changes behavior until `.swarm.json` `jev.mode` is `"enforce"`. Key missing or API error → fail open.
+
+**Why:** Turns the article's "evaluator talks itself out of findings" and the swarm's Fable-triage spend into ~150 ms typed judgments code can threshold. Shadow first because every threshold is a guess until logged against this user's issues.
+
+**Prereq (human):** `TYPESAFE_API_KEY` in `~/.config/typesafe/.env` (see Step 0). `op` CLI is not signed in on this machine; copy from the 1Password app.
+
+**Files:**
+- Create: `/Users/montrose/cc-config/code-swarm/scripts/jev.py`
+- Create: `/Users/montrose/cc-config/code-swarm/scripts/batteries/{verifier_leniency,issue_pretriage,finding_dedup,feature_sizing}.json`
+- Create: `/Users/montrose/cc-config/code-swarm/scripts/test_jev.py` (one runnable check)
+- Modify: `/Users/montrose/cc-config/code-swarm/skills/swarm/swarm.schema.json` (`jev` block)
+- Modify: `/Users/montrose/cc-config/code-swarm/skills/swarm/SKILL.md` (gate 2 in pre-flight; pass `jev` in `config`)
+- Modify: `/Users/montrose/cc-config/code-swarm/skills/swarm/swarm.js` (CONV line naming the CLI + mode; `tier` from gate 2 selects implementer `model`)
+- Modify: `/Users/montrose/cc-config/code-swarm/agents/{pr-verifier,issue-filer,product-planner}.md` (call the CLI; obey mode)
+
+**Acceptance Criteria:**
+- [ ] `jev.py <battery> <state.json>` prints answers JSON; with no key prints `{"skipped": true, "reason": "no TYPESAFE_API_KEY"}` and exits 0.
+- [ ] Every call appends one line to `~/.cache/code-swarm/jev.jsonl` (`ts, repo, gate, mode, state_hash, answers, agent_did`).
+- [ ] Schema: optional `jev: { mode: "shadow"|"enforce"|"off", default "shadow" }`.
+- [ ] `mode: "off"` → no calls. `"shadow"` → calls + log only. `"enforce"` → rules from the spec table apply.
+- [ ] Gate 2 in pre-flight never blocks a run on Jev failure; a skipped gate just means every issue goes to the triager as today.
+- [ ] `python3 code-swarm/scripts/test_jev.py` passes offline (fail-open path + threshold logic on canned answers).
+
+**Verify:** `cd /Users/montrose/cc-config && python3 code-swarm/scripts/test_jev.py && echo OK` → `OK`
+
+**Steps:**
+
+- [ ] **Step 0 (human): key file**
+
+```bash
+mkdir -p ~/.config/typesafe && umask 077 && printf 'export TYPESAFE_API_KEY=%s\n' '<paste from 1Password>' > ~/.config/typesafe/.env && chmod 600 ~/.config/typesafe/.env
+```
+Do not add it to `.zshrc`; `jev.py` sources this file itself when the env var is unset, so it also works under launchd (Task 5).
+
+- [ ] **Step 1: `jev.py`**
+
+Python, stdlib + `typesafe-sdk` (`python3 -m pip install --user typesafe-sdk`; `# ponytail: --user install, move to a venv under ~/.cache/code-swarm if it ever conflicts`). Behavior: load key from env or `~/.config/typesafe/.env`; read battery JSON `{questions: {...}}` and state JSON from argv; call `client.system_one(state=..., questions=...)` with a 10 s timeout; print `answers` as JSON; append log line. Any exception → print `{"skipped": true, "reason": "<class>: <msg>"}`, exit 0. Flags: `--gate <name> --mode <shadow|enforce|off> --agent-did '<json>'` for the log line. Port question wording from `jev-harness/src/jev.ts` (`GUARD_IN.injection`, `ROUTE.difficulty`) into the batteries.
+
+- [ ] **Step 2: batteries**
+
+Four JSON files, questions exactly as the spec table names them. Score levels must describe concrete situations (TypeSafe guidance), e.g. `complexity`: ["one function or one file, mechanical", "several files or one design decision", "cross-cutting, state transitions, or unclear approach"]. Include a no-match outcome where one is possible (`kind` gets `other`).
+
+- [ ] **Step 3: `test_jev.py`**
+
+Offline. Monkeypatch the client to raise → assert `{"skipped": true}` and exit 0. Feed canned answers into the pure threshold functions (`decide_pretriage`, `decide_leniency`, `decide_dedup`, `decide_sizing`, each a plain function in `jev.py`) and assert the spec table's rules: e.g. `has_test=0.2` → `needs_human`; `divergence=0.8, verdict=approve` → `changes_requested`; `same_problem=[0.1, 0.9]` → `dup_of` index 1.
+
+- [ ] **Step 4: wire gate 2 into SKILL.md pre-flight**
+
+After the queue is built: for each issue, `gh issue view N --json title,body` → state file → `jev.py issue_pretriage`. Shadow: print a column `jev` in the queue table (`kind/complexity/risk/tier`). Enforce: apply the spec rules before launch (relabel + comment via `gh`, drop from queue) and pass `tier` per issue in `args.issues` as `[{n, tier}]`. `swarm.js`: accept either bare numbers or `{n, tier}`; implementer `model` = `tier ?? "sonnet"`.
+
+- [ ] **Step 5: wire gates 1, 3, 4 into agents**
+
+Add to each agent a short section "## Jev gate (CONFIG names the CLI and mode)": build the state JSON, run the CLI, in shadow do nothing further, in enforce apply the one rule from the spec table. `pr-verifier`: after computing the verdict, before posting. `issue-filer`: per finding before `gh issue create`. `product-planner`: per feature before returning; on `single_pr_unit` < 0.4 split that feature once.
+
+- [ ] **Step 6: schema + CONV plumbing, verify, commit**
+
+`swarm.schema.json` gets the `jev` block; SKILL.md passes `jev.mode` in `config`; `swarm.js` CONV adds `Jev gates: mode <mode>; CLI <plugin>/scripts/jev.py` or `Jev gates off.`
+Run: `cd /Users/montrose/cc-config && python3 code-swarm/scripts/test_jev.py && echo OK` → `OK`
+```bash
+cd /Users/montrose/cc-config
+git add code-swarm/scripts code-swarm/skills/swarm code-swarm/agents
+git commit -m "feat(code-swarm): Jev gates (shadow mode) + jev.py CLI"
+```
+
+- [ ] **Step 7: shadow review after 5 runs**
+
+`python3 -c` one-liner over `~/.cache/code-swarm/jev.jsonl` grouping by gate: rows where Jev's enforce-rule would have differed from `agent_did`. Promote a gate to `enforce` in the pilot repo's `.swarm.json` only when those rows are ones the human agrees with. Record the decision per gate in this plan.
 
 ---
 
