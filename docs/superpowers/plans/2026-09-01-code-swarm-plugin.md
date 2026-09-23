@@ -691,7 +691,7 @@ Pick a web repo with `.swarm.json`; add `app`. Use an issue whose acceptance is 
 
 **Why:** Turns the article's "evaluator talks itself out of findings" and the swarm's Fable-triage spend into ~150 ms typed judgments code can threshold. Shadow first because every threshold is a guess until logged against this user's issues.
 
-**Prereq (human):** `TYPESAFE_API_KEY` in `~/.config/typesafe/.env` (see Step 0). `op` CLI is not signed in on this machine; copy from the 1Password app.
+**Prereq (human):** `TYPESAFE_API_KEY` in `~/.config/typesafe/.env` (see Step 0). Done 2026-09-23 on this MacBook via `op` CLI (desktop-app integration enabled that day); smoke test returned `jev-1.13.0`.
 
 **Files:**
 - Create: `/Users/montrose/cc-config/code-swarm/scripts/jev.py`
@@ -714,12 +714,13 @@ Pick a web repo with `.swarm.json`; add `app`. Use an issue whose acceptance is 
 
 **Steps:**
 
-- [ ] **Step 0 (human): key file**
+- [x] **Step 0 (human): key file** — done 2026-09-23
 
 ```bash
-mkdir -p ~/.config/typesafe && umask 077 && printf 'export TYPESAFE_API_KEY=%s\n' '<paste from 1Password>' > ~/.config/typesafe/.env && chmod 600 ~/.config/typesafe/.env
+# item title has parentheses, which op:// refs reject → use the item ID
+mkdir -p ~/.config/typesafe && umask 077 && printf 'export TYPESAFE_API_KEY=%s\n' "$(op read 'op://Private/7g6x3bsucb7ribovvibx7rk4tu/credential')" > ~/.config/typesafe/.env && chmod 600 ~/.config/typesafe/.env
 ```
-Do not add it to `.zshrc`; `jev.py` sources this file itself when the env var is unset, so it also works under launchd (Task 5).
+Do not add it to `.zshrc`; `jev.py` sources this file itself when the env var is unset, so it also works under launchd (Task 5). Re-run the same line on a new machine.
 
 - [ ] **Step 1: `jev.py`**
 
