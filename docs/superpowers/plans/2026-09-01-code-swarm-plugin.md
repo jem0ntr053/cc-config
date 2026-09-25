@@ -608,6 +608,8 @@ git commit -m "feat(code-swarm): product-planner + /swarm --build"
 
 From a dayos session: `/swarm --build "todo list with tags and a daily digest"`. Expect: spec PR open on `spec/todo-list-with-tags-and`, N unlabeled issues each starting `Spec: docs/specs/…#feature-n`, `git status --porcelain | grep -v '^??' | wc -l` on main → `0`. Rerun same prompt → refused (slug exists). Close the test issues and PR afterwards unless useful.
 
+DONE 2026-09-24 on AutoCrate instead (user switched pilots; dayos's no-push rule stopped the planner): spec PR #112 + unlabeled issues #113-#115, each with a working `#feature-n` blob link and `Depends on` lines; same-slug rerun refused; all closed and spec branch deleted. Planner finding worth keeping: genre is dropped at intake (not stored, not written, not synced) — see closed #113.
+
 ---
 
 ### Task 8 (v1.2): `app` evaluator lens in `pr-verifier`
