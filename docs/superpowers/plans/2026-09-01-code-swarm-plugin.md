@@ -529,6 +529,8 @@ git commit -m "refactor: migrate AutoCrate onto code-swarm plugin"
 ```
 (Human merges any PRs the swarm later opens — unchanged.)
 
+DONE 2026-09-24 as AutoCrate PR #116 (branch refactor/migrate-to-code-swarm; a pre-push hook blocks direct pushes to main). Deletion list confirmed by the user first. Proof: plugin took #108 end to end (PR #111, merged); after deletion a bare `/swarm --dry-run --issue 85` resolved to the plugin, pre-flight OK (armed=true), no writes. `.claude/agents/` = 4 on the branch. test_cmd uses the venv's python directly (the worktree guard refuses `source`).
+
 ---
 
 ### Task 7 (v1.2): `product-planner` agent + `/swarm --build "<prompt>"`
