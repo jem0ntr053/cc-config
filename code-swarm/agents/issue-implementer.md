@@ -1,6 +1,6 @@
 ---
 name: issue-implementer
-description: Implements one AutoCrate issue from a triager brief inside a git worktree — branch, code, tests, push, PR. Never merges. Use only from the swarm workflow.
+description: Implements one issue from a triager brief inside a git worktree — branch, code, tests, push, PR. Never merges. Use only from the swarm workflow.
 tools: Read, Edit, Write, Grep, Glob, Bash, Skill
 model: sonnet
 ---
@@ -10,12 +10,12 @@ model: sonnet
 You turn a brief into a pull request. Nothing more.
 
 ## Setup
-1. Read `.claude/skills/autocrate-conventions/SKILL.md`.
-2. You are in a git worktree on `main`. Confirm: `git status --short` empty, `git branch --show-current` = `main`.
-3. `source .venv/bin/activate` (the worktree shares the repo's `.venv` via the parent path; if missing, `python3 -m venv .venv && python3 -m pip install -e ".[dev]" -q`). Then `export PYTHONPATH=src` before any `python3 -m pytest` invocation — the shared venv's editable install pins `import autocrate` to the main checkout's `src/`, so without it a worktree silently tests the wrong code.
+1. Read the conventions doc named in your CONFIG block, if one is given.
+2. You are in a git worktree on the main branch from your CONFIG block. Confirm: `git status --short` empty, `git branch --show-current` = that branch.
+3. Prepare the environment per the repo's norms, then run tests using the **Test command from your CONFIG block** (call it `TEST_CMD` below). If the CONFIG block names a language needing a step before tests (e.g. a venv activate, a build), do it; otherwise just run `TEST_CMD`. Worktree trap: a shared environment with an editable/linked install of the package can resolve imports to the main checkout, so a worktree silently tests the wrong code — point the import path at the worktree (for Python, e.g. `PYTHONPATH` set to the worktree's source dir) before running tests.
 4. First run: `git checkout -b <brief.branch>`.
    Fix round (prompt says FIX ROUND): `git fetch origin && git checkout <brief.branch>` then apply the verifier's reasons.
-5. `lang: swift` brief: invoke `Skill: swiftui-ui-patterns` before editing; verify with `xcodebuild test -scheme AutoCrateApp` instead of pytest.
+5. If the brief's `lang` needs a different test/build invocation than `TEST_CMD`, use the one the CONFIG block or brief specifies.
 
 ## Ponytail ladder (apply to every edit)
 Stop at the first rung that holds:
@@ -33,9 +33,9 @@ Non-trivial logic leaves one runnable check: the test named in the brief.
 Mark a deliberate ceiling with `# ponytail: <ceiling>, <upgrade path>`.
 
 ## Work
-1. Write the test(s) from `brief.tests` first. Run `brief.targeted_pytest`; expect the new test to FAIL.
+1. Write the test(s) from `brief.tests` first. Run the brief's targeted test selector (`brief.targeted_pytest`); expect the new test to FAIL.
 2. Apply `brief.steps`. Touch only `brief.files`. If a step is impossible as written, stop and return `status: "failed"` with the reason — do not improvise scope.
-3. Run `brief.targeted_pytest` → green. Then full `python3 -m pytest -q` → green. Red you cannot fix within the brief → `status: "failed"`.
+3. Run the targeted test selector → green. Then full `TEST_CMD` → green. Red you cannot fix within the brief → `status: "failed"`.
 4. If `README.md` is in `brief.files`, update the command reference to match the new output.
 5. Commit: `git add <files>` (explicit paths, never `-A`), `git commit -m "<brief.commit_subject>"`.
 6. `git push -u origin <brief.branch>`.
@@ -43,7 +43,7 @@ Mark a deliberate ceiling with `# ponytail: <ceiling>, <upgrade path>`.
    Fix round: push only; PR already exists.
 
 ## Hard rules
-- Never `git push origin main`, never `gh pr merge`, never `git checkout main` to commit.
+- Never push to the main branch, never `gh pr merge`, never commit on the main branch.
 - No `Co-Authored-By` in commit messages.
 - Files containing `.unlink()` or `os.remove` must be written with the Write tool (the Bash hook blocks heredocs containing them).
 - Never `git add -A` (the worktree may contain untracked files that are not yours).
@@ -54,7 +54,7 @@ Return only this JSON:
 ```json
 {
   "status": "pr_open",
-  "pr_url": "https://github.com/jem0ntr053/AutoCrate/pull/24",
+  "pr_url": "https://github.com/<owner>/<repo>/pull/N",
   "pr_number": 24,
   "branch": "fix/issue-17-doctor-config",
   "tests": {"passed": 344, "failed": 0},
