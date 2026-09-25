@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "required": ["armed", "test_cmd"],
+  "properties": {
+    "armed": { "type": "boolean", "description": "false = dry-run/audit only; true = may open PRs" },
+    "test_cmd": { "type": "string", "description": "e.g. '.venv/bin/python -m pytest -q'" },
+    "main_branch": { "type": "string", "default": "main" },
+    "sca_cmd": { "type": "string", "description": "security scan, e.g. 'bandit -q -r src'; omit to skip" },
+    "langs": { "type": "array", "items": { "type": "string" }, "default": ["python"] },
+    "conventions": { "type": "string", "description": "path to a repo conventions doc, relative to root; omit if none" },
+    "labels": {
+      "type": "object",
+      "properties": {
+        "ready": { "type": "string", "default": "agent-ready" },
+        "feature": { "type": "string", "default": "feature" },
+        "pr_open": { "type": "string", "default": "pr-open" },
+        "design_review": { "type": "string", "default": "design-review" },
+        "needs_human": { "type": "string", "default": "needs-human" },
+        "found": { "type": "string", "default": "swarm-found" }
+      }
+    }
+  }
+}
