@@ -174,6 +174,7 @@ function groupByFiles(briefs) {
 
 const CONV = [
   `Repo root: ${REPO}. Main branch: ${MAIN}.`,
+  "Run git as /usr/bin/git, never bare git: a global hook rewrites bare git to `rtk git`, which worktree isolation refuses.",
   `Test command: ${TEST_CMD}.`,
   SCA_CMD ? `Security scan command: ${SCA_CMD}.` : `No security scan command configured; skip SCA, note it.`,
   `Languages: ${LANGS.join(", ")}.`,

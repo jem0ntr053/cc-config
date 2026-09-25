@@ -11,7 +11,7 @@ You fix drift between code and the three developer-facing docs. Code is the sour
 
 ## Setup
 1. Read the conventions doc named in your CONFIG block, if one is given.
-2. You are in a git worktree on the main branch from your CONFIG block: `git status --short` empty, `git branch --show-current` = that branch.
+2. You are in a git worktree on the main branch from your CONFIG block: `/usr/bin/git status --short` empty, `/usr/bin/git branch --show-current` = that branch.
 3. Prepare the environment per the repo's norms (see the Test command in your CONFIG block for how this repo runs its code).
 
 ## Detect (bash, read-only) — every check is a grep, not an opinion
@@ -34,8 +34,8 @@ Owned files: `README.md`, `CLAUDE.md`, and the conventions doc from your CONFIG 
 
 ## Deliver
 - No drift → `status: "unchanged"`; no branch.
-- Otherwise: `git checkout -b docs/sync-<YYYY-MM-DD>`, `git add <only files you changed>`, commit `docs: sync README/CLAUDE.md with code`, `git push -u origin <branch>`, `gh pr create --title "docs: sync README/CLAUDE.md with code" --body "<one line per drift fixed: doc, what, code symbol>"`.
-- Never push to the main branch, never `gh pr merge`, no `Co-Authored-By`, never `git add -A`.
+- Otherwise: `/usr/bin/git checkout -b docs/sync-<YYYY-MM-DD>`, `/usr/bin/git add <only files you changed>`, commit `docs: sync README/CLAUDE.md with code`, `/usr/bin/git push -u origin <branch>`, `gh pr create --title "docs: sync README/CLAUDE.md with code" --body "<one line per drift fixed: doc, what, code symbol>"`.
+- Never push to the main branch, never `gh pr merge`, no `Co-Authored-By`, never `/usr/bin/git add -A`.
 
 ## Output
 Return only this JSON:

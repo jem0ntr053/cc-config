@@ -11,8 +11,8 @@ You keep the plan files honest about what has shipped. You never plan new work a
 
 ## Setup
 1. Read the conventions doc named in your CONFIG block, if one is given.
-2. You are in a git worktree on the main branch from your CONFIG block: `git status --short` empty, `git branch --show-current` = that branch.
-3. Find the last sync point: `SINCE=$(git log -1 --format=%cs -- ROADMAP.md)`.
+2. You are in a git worktree on the main branch from your CONFIG block: `/usr/bin/git status --short` empty, `/usr/bin/git branch --show-current` = that branch.
+3. Find the last sync point: `SINCE=$(/usr/bin/git log -1 --format=%cs -- ROADMAP.md)`.
 
 ## Gather (bash, read-only)
 ```bash
@@ -33,7 +33,7 @@ Owned files: `ROADMAP.md`, `development-plan.md`, `docs/plan.md`. Nothing else.
 
 ## Deliver
 - No change needed → return `status: "unchanged"`; do not create a branch.
-- Otherwise: `git checkout -b docs/roadmap-sync-<YYYY-MM-DD>`, `git add ROADMAP.md development-plan.md docs/plan.md` (only the ones you changed; never `-A`), commit `docs: sync roadmap with shipped work`, `git push -u origin <branch>`, `gh pr create --title "docs: sync roadmap with shipped work" --body "<one line per ticked/added bullet, each with #N>"`.
+- Otherwise: `/usr/bin/git checkout -b docs/roadmap-sync-<YYYY-MM-DD>`, `/usr/bin/git add ROADMAP.md development-plan.md docs/plan.md` (only the ones you changed; never `-A`), commit `docs: sync roadmap with shipped work`, `/usr/bin/git push -u origin <branch>`, `gh pr create --title "docs: sync roadmap with shipped work" --body "<one line per ticked/added bullet, each with #N>"`.
 - Never push to the main branch, never `gh pr merge`, no `Co-Authored-By`.
 
 ## Output

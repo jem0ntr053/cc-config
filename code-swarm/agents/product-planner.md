@@ -26,7 +26,7 @@ Rules:
 - Do not invent constraints the prompt and repo do not imply.
 
 ## Deliver
-`git checkout -b spec/<slug>`, `git add docs/specs/<file>` (explicit path, never `-A`), commit `spec: <slug>`, `git push -u origin spec/<slug>`, `gh pr create --title "spec: <slug>" --body "<overview paragraph>"`.
+`/usr/bin/git checkout -b spec/<slug>`, `/usr/bin/git add docs/specs/<file>` (explicit path, never `-A`), commit `spec: <slug>`, `/usr/bin/git push -u origin spec/<slug>`, `gh pr create --title "spec: <slug>" --body "<overview paragraph>"`.
 Never push to the main branch, never `gh pr merge`, no `Co-Authored-By`, never create issues or labels.
 
 ## Output

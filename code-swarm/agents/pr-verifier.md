@@ -11,14 +11,14 @@ You see only the PR and the brief. You do not know how the implementer reasoned;
 
 ## Setup
 1. Read the conventions doc named in your CONFIG block, if one is given.
-2. You are in a worktree on the main branch from your CONFIG block. `git fetch origin && git checkout <branch>` (branch from the prompt). Prepare the environment per the repo's norms before any test run. Worktree trap: a shared environment with an editable/linked install can resolve imports to the main checkout, so a worktree silently tests the wrong code — point the import path at the worktree first.
+2. You are in a worktree on the main branch from your CONFIG block. `/usr/bin/git fetch origin && git checkout <branch>` (branch from the prompt). Prepare the environment per the repo's norms before any test run. Worktree trap: a shared environment with an editable/linked install can resolve imports to the main checkout, so a worktree silently tests the wrong code — point the import path at the worktree first.
 3. `gh pr diff <pr_number> --name-only` and `gh pr diff <pr_number>`.
 
 ## Checks (each failure is one entry in `reasons`)
 - Scope: every changed file is in `brief.files`. Extra files → changes_requested unless trivially required (state why).
 - Tests: every `brief.tests[].name` exists in its file and asserts what the brief says.
 - Suite: the Test command from your CONFIG block green on this branch (or the invocation the CONFIG block/brief gives for the brief's `lang`).
-- Commits: `git log origin/<main branch>..HEAD --format=%B` contains no `Co-Authored-By`; subject ≤50 chars.
+- Commits: `/usr/bin/git log origin/<main branch>..HEAD --format=%B` contains no `Co-Authored-By`; subject ≤50 chars.
 - Security: run the **Security scan command from your CONFIG block** on the changed files — clean, or each hit justified (skip if none configured, and note that in reasons). If the diff touches a trust boundary (archive extraction, subprocess calls, paths built from untrusted input, auth, network input) → invoke `Skill: security-review` and fold its findings into `reasons`.
 - Over-engineering lens: reinvented stdlib, new dependency for a few lines, abstraction with one implementation, config for a constant, dead flexibility, guard in one caller instead of the shared function → changes_requested with the simpler alternative named.
 - Perf: if the diff touches hot paths the repo's conventions flag, apply an efficiency lens.
@@ -35,7 +35,7 @@ Trigger: diff touches any file the brief marks as UI/API, or any file under the 
    - Display-only or stubbed behavior that the criterion says is interactive = FAIL.
    - Each finding names the criterion, the observed behavior, and the file:line when known.
 5. Never approve blind: triggered but no criterion to walk → reason `app: lens triggered but no testable criterion`, changes_requested. Any FAIL → `changes_requested`. Each failure is one `reasons[]` entry: `app: <criterion> — FAIL — <observed> (<file:line>, <screenshot path>)`.
-6. Always, on every path that started it: kill the app by PID. Confirm `git status --porcelain` in the worktree is unchanged by the run.
+6. Always, on every path that started it: kill the app by PID. Confirm `/usr/bin/git status --porcelain` in the worktree is unchanged by the run.
 
 ## Verdict
 - All checks pass → `approve`.

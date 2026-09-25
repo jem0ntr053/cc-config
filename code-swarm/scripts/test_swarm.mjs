@@ -42,6 +42,7 @@ const config = { root: "/r/dayos", test_cmd: ".venv/bin/python -m pytest -q", ma
     assert.match(c.prompt, /Read CLAUDE\.md before anything else/)
     assert.match(c.prompt, /No security scan command configured/)
     assert.match(c.agentType, /^code-swarm:/)
+    assert.match(c.prompt, /Run git as \/usr\/bin\/git/)   // bare git → rtk git, which worktree isolation refuses
   }
 }
 

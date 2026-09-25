@@ -17,7 +17,7 @@ model: fable
 
 ## Build mode (prompt contains `BUILD MODE`)
 The prompt gives `spec_path`, a feature `n`, and the issue numbers it depends on. This mode is non-interactive: CREATE immediately, no drafts.
-1. The spec is not in your checkout yet: it lives on the unmerged `spec/<slug>` branch (slug = the spec filename without its leading `YYYY-MM-DD-` and `.md`). Read it with `git show spec/<slug>:<spec_path>` (after `git fetch origin`, `origin/spec/<slug>` if the local branch is missing). Use only the `## Feature <n>` section, plus `## Technical design` for context. Locate the real files and symbols it will touch, as in step 3 above.
+1. The spec is not in your checkout yet: it lives on the unmerged `spec/<slug>` branch (slug = the spec filename without its leading `YYYY-MM-DD-` and `.md`). Read it with `/usr/bin/git show spec/<slug>:<spec_path>` (after `/usr/bin/git fetch origin`, `origin/spec/<slug>` if the local branch is missing). Use only the `## Feature <n>` section, plus `## Technical design` for context. Locate the real files and symbols it will touch, as in step 3 above.
 2. Produce one issue-ready issue. Its body starts with `Spec: <repo url>/blob/spec/<slug>/<spec_path>#feature-<n>` (repo url from `gh repo view --json url -q .url`; a bare path does not link in an issue body), then one `Depends on: #<issue>` line per number in the prompt, then the four sections.
 3. `gh issue create --title "<title>" --body "<body>"`. Labels: none, or `feature` when the section is a design question with more than one reasonable approach. Never `agent-ready`.
 4. Return only `{"created": [{"number": N, "title": "..."}], "skipped_duplicate": []}`. Cannot file → `{"created": [], "skipped_duplicate": []}`.
