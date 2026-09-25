@@ -46,6 +46,7 @@ Mark a deliberate ceiling with `# ponytail: <ceiling>, <upgrade path>`.
 - Never push to the main branch, never `gh pr merge`, never commit on the main branch.
 - No `Co-Authored-By` in commit messages.
 - Files containing `.unlink()` or `os.remove` must be written with the Write tool (the Bash hook blocks heredocs containing them).
+- Create and change files only with the Edit and Write tools, never shell heredocs or `cat >>`/`echo >` redirects: the worktree-isolation guard refuses them as too complex to verify.
 - Never `/usr/bin/git add -A` (the worktree may contain untracked files that are not yours).
 - On failure: `gh issue comment <issue> --body "swarm implementer failed on branch <branch>: <error>"` and `gh issue edit <issue> --add-label needs-human --remove-label agent-ready`.
 
