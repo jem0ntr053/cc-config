@@ -1,6 +1,6 @@
 ---
 name: swarm
-description: Run the code-swarm on the current repo — agent-ready GitHub issues become verified PRs (human merges). Flags: --dry-run (triage only), --audit (security + test-gap only), --docs, --issue N. Requires a .swarm.json at the repo root. Use on "/swarm", "run the swarm", "process the issue queue", "audit the repo".
+description: Run the code-swarm on the current repo — agent-ready GitHub issues become verified PRs (human merges). Flags: --dry-run (triage only), --audit (security + test-gap only), --docs, --issue N, --build "<prompt>" (prompt → spec PR + unlabeled issues, no code). Requires a .swarm.json at the repo root. Use on "/swarm", "run the swarm", "process the issue queue", "audit the repo".
 ---
 
 # /swarm
@@ -8,12 +8,12 @@ description: Run the code-swarm on the current repo — agent-ready GitHub issue
 You are the coordinator. You run bash pre-flight, build the queue, launch the Workflow, and print the summary. You do not implement issues yourself.
 
 ## 1. Parse flags
-From `$ARGUMENTS`: `--dry-run`, `--audit`, `--docs`, one or more `--issue N`. Unknown flag → stop and say so. `--audit` and `--docs` are standalone modes; combining them with each other or with `--issue` → stop and say so.
+From `$ARGUMENTS`: `--dry-run`, `--audit`, `--docs`, one or more `--issue N`, `--build "<prompt>"`. Unknown flag → stop and say so. `--audit`, `--docs` and `--build` are standalone modes; combining one with any other flag → stop and say so. For `--build`, SLUG = kebab-case of the prompt's first 5 words (lowercase, non-alphanumerics → `-`).
 
 ## 2. Pre-flight (bash, no agents). Any failure → print reason, stop.
-Set `DRY_RUN=1` for `--dry-run` and `AUDIT=1` for `--audit` (else `0`) at the top of the block.
+Set `DRY_RUN=1` for `--dry-run`, `AUDIT=1` for `--audit`, and `BUILD=1` plus `SLUG=<slug>` for `--build` (else `0` / empty) at the top of the block.
 ```bash
-DRY_RUN=0; AUDIT=0   # set from flags
+DRY_RUN=0; AUDIT=0; BUILD=0; SLUG=""   # set from flags
 ROOT="$(git rev-parse --show-toplevel)" || { echo "PRE-FLIGHT: not in a git repo"; exit 1; }
 cd "$ROOT"
 [ -f .swarm.json ] || { echo "PRE-FLIGHT: no .swarm.json — repo has not opted in"; exit 1; }
@@ -23,8 +23,14 @@ ARMED=$(jq -r '.armed // false' .swarm.json)
 TEST_CMD=$(jq -r '.test_cmd' .swarm.json)
 MAIN=$(jq -r '.main_branch // "main"' .swarm.json)
 gh auth status >/dev/null 2>&1 || { echo "PRE-FLIGHT: gh not authenticated"; exit 1; }
+if [ "$BUILD" = "1" ]; then   # writes a spec + issues, never code: armed not required
+  if ls docs/specs/*-"$SLUG".md >/dev/null 2>&1 || git show-ref --quiet "refs/heads/spec/$SLUG" \
+     || git ls-remote --exit-code --heads origin "spec/$SLUG" >/dev/null 2>&1; then
+    echo "PRE-FLIGHT: spec slug '$SLUG' already exists — reword the prompt or delete the old spec"; exit 1
+  fi
+fi
 if [ "$DRY_RUN" != "1" ] && [ "$AUDIT" != "1" ]; then
-  [ "$ARMED" = "true" ] || { echo "PRE-FLIGHT: .swarm.json armed=false — dry-run/audit only until you arm this repo"; exit 1; }
+  [ "$BUILD" = "1" ] || [ "$ARMED" = "true" ] || { echo "PRE-FLIGHT: .swarm.json armed=false — dry-run/audit only until you arm this repo"; exit 1; }
   [ -z "$(git status --porcelain | grep -v '^??')" ] || { echo "PRE-FLIGHT: tracked changes in working tree"; exit 1; }
   [ "$(git branch --show-current)" = "$MAIN" ] || { echo "PRE-FLIGHT: not on $MAIN"; exit 1; }
   git pull -q origin "$MAIN"
@@ -51,6 +57,7 @@ gh issue list --label "$READY" --state open --json number,title,labels \
 gh issue list --label "$FEATURE" --state open --json number,title,labels \
   -q ".[] | select(.labels | map(.name) | index(\"$DESIGN_REVIEW\") | not) | \"\\(.number)\\t\\(.title)\""
 ```
+`--build` → skip this step (no queue).
 `--issue N` given → queue is exactly those numbers. On a real run they must still carry `$READY` (drop any that don't, and say so). On `--dry-run`, `--issue N` needs no label: nothing is written, so any open issue may be triaged as a preview. `--dry-run` also skips features (design posts comments). `--audit` or `--docs` → queue and features are empty.
 
 Print the queue and features as a table. In an interactive session, ask once: "Launch?" — proceed on yes. Empty queue and empty features and neither `--audit` nor `--docs` → say "nothing to do" and stop.
@@ -64,6 +71,7 @@ Workflow({
           config: <object printed by pre-flight> }
 })
 ```
+For `--build`: `args: { build: "<prompt verbatim>", date: "<today YYYY-MM-DD>", config: <object printed by pre-flight> }`. In an interactive session, confirm the prompt and slug once before launching.
 `args` is a JSON object, never a string. Wait for the completion notification; do not poll.
 
 ## 5. Summary
@@ -77,6 +85,14 @@ When the workflow returns, print:
 Then `designs: N posted (label design-review)` and `findings: N filed, M duplicates` listing created issue numbers. If `filed.error` is set, print the raw findings so nothing is lost.
 
 For `--dry-run`: print each brief (issue, branch, files, tests) and the rejected list. Confirm `git status --porcelain` is unchanged.
+
+For `--build`: if `error` is set, print it, the planner's `findings` (its reason, e.g. slug exists), and the prompt back; nothing was filed. Otherwise print
+
+| feature | issue | title |
+|---|---|---|
+| 1 | #41 | Tasks |
+
+then each `unfiled` row as `feature <n> (<title>): file by hand from <anchor>`, then the spec PR URL, then the line "Label `agent-ready` on the issues you want built, then run `/swarm`."
 
 For `--docs`: print one row per syncer:
 

@@ -2,6 +2,7 @@ export const meta = {
   name: "code-swarm",
   description: "Turn agent-ready issues into verified PRs; --audit files security/test-gap findings",
   phases: [
+    { title: "Plan", detail: "product-planner writes docs/specs/<slug>.md" },
     { title: "Design", detail: "feature-architect posts designs on `feature` issues" },
     { title: "Triage", detail: "issue-triager builds briefs" },
     { title: "Implement", detail: "issue-implementer opens PRs (worktrees)" },
@@ -13,7 +14,7 @@ export const meta = {
 }
 
 const {
-  issues = [], features = [], dryRun = false, audit = false, docs = false, date = "unknown",
+  issues = [], features = [], dryRun = false, audit = false, docs = false, build = "", date = "unknown",
   config = {},
 } = args ?? {}
 const REPO = config.root ?? "."
@@ -134,6 +135,24 @@ const FILER_SCHEMA = {
   required: ["created", "skipped_duplicate"],
 }
 
+const PLAN_SCHEMA = {
+  type: "object",
+  properties: {
+    spec_path: { type: "string" },
+    pr_url: { type: "string" },
+    features: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: { n: { type: "integer" }, title: { type: "string" }, depends_on: { type: "array", items: { type: "integer" } } },
+        required: ["n", "title", "depends_on"],
+      },
+    },
+    findings: FINDINGS,
+  },
+  required: ["spec_path", "pr_url", "features", "findings"],
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 // GROUP-BEGIN
@@ -164,6 +183,29 @@ const collect = r => { if (r && Array.isArray(r.findings)) findings.push(...r.fi
 let results = []
 let designCount = 0
 let docsResults = []
+
+// ── Build mode ────────────────────────────────────────────────────────────────
+
+if (build) {
+  phase("Plan")
+  const plan = await agent(`${CONV}\nToday is ${date}. PROMPT:\n${build}\nWrite the product spec per your instructions, open the spec PR, and return the plan JSON.`,
+    { label: "plan:spec", phase: "Plan", agentType: "code-swarm:product-planner", schema: PLAN_SCHEMA, effort: "high", isolation: "worktree" })
+  collect(plan)   // before the guard: a deliberate abort explains itself in findings
+  if (!plan || !plan.spec_path) return { build: true, error: "planner returned no spec", prompt: build, findings }
+  phase("File")
+  const issueOf = {}   // feature n → issue number
+  const issues = [], unfiled = []
+  // ponytail: sequential filing so depends_on can cite real issue numbers; two-pass (create, then edit bodies) if a spec ever has >30 features.
+  for (const f of plan.features) {
+    const deps = (f.depends_on ?? []).map(d => issueOf[d]).filter(Boolean)
+    const r = await agent(`${CONV}\nBUILD MODE. spec_path: ${plan.spec_path}. feature: ${f.n} (${f.title}). depends_on issues: ${deps.join(", ") || "none"}. File it per your instructions.`,
+      { label: `file:f${f.n}`, phase: "File", agentType: "code-swarm:issue-groomer", schema: FILER_SCHEMA, effort: "medium" })
+    const c = r?.created?.[0]
+    if (c) { issueOf[f.n] = c.number; issues.push({ ...c, feature: f.n }) }
+    else unfiled.push({ feature: f.n, title: f.title, anchor: `${plan.spec_path}#feature-${f.n}` })
+  }
+  return { build: true, spec_path: plan.spec_path, pr_url: plan.pr_url ?? "", issues, unfiled, findings }
+}
 
 // ── Audit mode ────────────────────────────────────────────────────────────────
 

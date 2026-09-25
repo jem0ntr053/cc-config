@@ -15,11 +15,15 @@ const CANNED = {
   "feature-architect": { skip: false, approach: "x", findings: [] },
 }
 
-async function run(args) {
+// respond(type, prompt) may override the canned reply; return undefined to fall through
+async function run(args, respond = () => undefined) {
   const calls = []
   const agent = async (prompt, opts) => {
     calls.push({ prompt, ...opts })
-    return CANNED[opts.agentType.replace(/^code-swarm:/, "")] ?? { findings: [], created: [], skipped_duplicate: [] }
+    const type = opts.agentType.replace(/^code-swarm:/, "")
+    const r = respond(type, prompt)
+    if (r !== undefined) return r
+    return CANNED[type] ?? { findings: [], created: [], skipped_duplicate: [] }
   }
   const result = await script(args, agent, fns => Promise.all(fns.map(f => f())),
     (items, fn) => Promise.all(items.map(fn)), () => {}, () => {})
@@ -55,6 +59,50 @@ const config = { root: "/r/dayos", test_cmd: ".venv/bin/python -m pytest -q", ma
   const { calls } = await run({ issues: [], features: [21], config })
   assert.ok(calls.some(c => c.agentType === "code-swarm:feature-architect"))
   assert.ok(calls.every(c => !/DRY RUN/.test(c.prompt)))
+}
+
+// --build: planner writes the spec, then one groomer per feature in order, citing earlier issue numbers
+{
+  const plan = { spec_path: "docs/specs/2026-09-24-todo.md", pr_url: "https://x/pull/5", findings: [],
+    features: [{ n: 1, title: "tasks", depends_on: [] }, { n: 2, title: "tags", depends_on: [1] }, { n: 3, title: "digest", depends_on: [1, 2] }] }
+  const issueFor = { 1: 101, 3: 103 }   // feature 2's groomer fails
+  const { calls, result } = await run({ build: "todo list with tags", date: "2026-09-24", config }, (type, prompt) => {
+    if (type === "product-planner") return plan
+    if (type === "issue-groomer") {
+      const n = Number(prompt.match(/feature: (\d+)/)[1])
+      return issueFor[n] ? { created: [{ number: issueFor[n], title: `f${n}` }], skipped_duplicate: [] } : null
+    }
+  })
+  assert.deepEqual(calls.map(c => c.agentType),
+    ["code-swarm:product-planner", "code-swarm:issue-groomer", "code-swarm:issue-groomer", "code-swarm:issue-groomer"])
+  assert.match(calls[0].prompt, /todo list with tags/)
+  assert.equal(calls[0].isolation, "worktree")
+  assert.match(calls[1].prompt, /depends_on issues: none/)
+  assert.match(calls[3].prompt, /depends_on issues: 101\./)     // feature 2 unfiled → not cited
+  assert.equal(result.build, true)
+  assert.equal(result.spec_path, plan.spec_path)
+  assert.equal(result.pr_url, plan.pr_url)
+  assert.deepEqual(result.issues, [{ number: 101, title: "f1", feature: 1 }, { number: 103, title: "f3", feature: 3 }])
+  assert.deepEqual(result.unfiled, [{ feature: 2, title: "tags", anchor: "docs/specs/2026-09-24-todo.md#feature-2" }])
+  assert.ok(!calls.some(c => c.agentType === "code-swarm:issue-filer"))
+}
+
+// --build: planner returns nothing → abort, no issues filed
+{
+  const { calls, result } = await run({ build: "x", config }, type => type === "product-planner" ? null : undefined)
+  assert.equal(calls.length, 1)
+  assert.equal(result.build, true)
+  assert.match(result.error, /planner returned no spec/)
+}
+
+// --build: planner aborts on purpose (e.g. slug exists) → its reason reaches the result
+{
+  const why = { title: "slug exists", body: "docs/specs/2026-01-01-x.md", kind: "debt", source: "build" }
+  const { calls, result } = await run({ build: "x", config },
+    type => type === "product-planner" ? { spec_path: "", pr_url: "", features: [], findings: [why] } : undefined)
+  assert.equal(calls.length, 1)
+  assert.match(result.error, /planner returned no spec/)
+  assert.deepEqual(result.findings, [why])
 }
 
 console.log("OK")
