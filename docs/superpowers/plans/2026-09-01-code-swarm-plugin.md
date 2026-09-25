@@ -34,9 +34,9 @@
 **Acceptance Criteria:**
 - [ ] `code-swarm` appears in `claude plugin` marketplace listing for `cc-config`.
 - [ ] `swarm.js` has no `/Users/montrose/.../AutoCrate` literal, no `meta.name` = `autocrate-swarm`, no hardcoded `lang` enum, no hardcoded conventions path — all read from `args.config`.
-- [ ] `node --check swarm.js` passes (syntax).
+- [ ] `swarm.js` parses and behaves under a stub Workflow runtime (`node --check` cannot: Workflow scripts have a top-level `return`).
 
-**Verify:** `node --check /Users/montrose/cc-config/code-swarm/skills/swarm/swarm.js && echo OK` → `OK`
+**Verify:** `node /Users/montrose/cc-config/code-swarm/scripts/test_swarm.mjs` → `OK`
 
 **Steps:**
 

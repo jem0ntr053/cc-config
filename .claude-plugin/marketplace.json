@@ -7,6 +7,11 @@
       "name": "cc-config",
       "source": "./",
       "description": "Personal cross-project workflow: model-tier pre-flight, handoffs, session debrief, token-aware routing"
+    },
+    {
+      "name": "code-swarm",
+      "source": "./code-swarm",
+      "description": "Cross-repo issue swarm: agent-ready GitHub issues become verified PRs (human merges)"
     }
   ]
 }
