@@ -460,6 +460,8 @@ git commit -m "feat: nightly inspect-only swarm + ntfy digest"
 ```
 (The plist lives in `~/Library/LaunchAgents`, outside the repo — not committed; note it in the plugin README.)
 
+DONE 2026-09-25: LaunchAgent loaded (03:00, random ntfy.sh topic saved in ~/.config/swarm-ntfy-topic). First run via `launchctl kickstart`: exit 0, dayos audit filed #20-#27, both trees unchanged, digest delivered. AutoCrate was skipped (local checkout predated the #116 merge; pulled since). `claude -p` resolves plugin skills (handoff question answered). Digest now names failed passes; findings counts still deferred (ponytail note).
+
 ---
 
 ### Task 6 (v1.1): Migrate AutoCrate onto the plugin
