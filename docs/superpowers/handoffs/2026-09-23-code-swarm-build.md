@@ -2,7 +2,7 @@
 
 Date: 2026-09-23
 From: Fable session that wrote the spec and plan
-To: Sonnet session that executes the plan
+To: Opus 5.5 session that executes the plan
 
 ## Paste this as the first message
 
@@ -62,6 +62,6 @@ final check is `git status --porcelain | grep -v '^??' | wc -l` → `0` in the
 pilot repo after `/swarm --dry-run`.
 
 ## Recommended Model
-- Model: sonnet
-- Reason: Executing the approved plan Tasks 1–4 (scaffold plugin, config loader, agent decoupling, pilot dry-run) with verify commands already written.
-- Resume: `/model sonnet`
+- Model: opus
+- Reason: User chose Opus 5.5 for Tasks 1–4 because agent decoupling and the pilot dry-run need judgment beyond mechanical plan execution.
+- Resume: `/model opus`
