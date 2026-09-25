@@ -105,4 +105,13 @@ const config = { root: "/r/dayos", test_cmd: ".venv/bin/python -m pytest -q", ma
   assert.deepEqual(result.findings, [why])
 }
 
+// app block → every prompt tells the verifier how to start the app; absent → lens explicitly off
+{
+  const withApp = { ...config, app: { start_cmd: "npm run dev", url: "http://localhost:5173" } }
+  const { calls } = await run({ issues: [9], dryRun: true, config: withApp })
+  assert.match(calls[0].prompt, /App: start with "npm run dev", url http:\/\/localhost:5173, wait 10s before testing\./)
+  const { calls: plain } = await run({ issues: [9], dryRun: true, config })
+  assert.match(plain[0].prompt, /No app block; skip the live-app lens\./)
+}
+
 console.log("OK")

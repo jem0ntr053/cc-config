@@ -683,6 +683,8 @@ git commit -m "feat(code-swarm): live-app evaluator lens in pr-verifier"
 
 Pick a web repo with `.swarm.json`; add `app`. Use an issue whose acceptance is a button the implementation deliberately leaves unwired. `/swarm --issue N` → verifier `changes_requested` with an `app:` reason and screenshot path. Remove `app` → rerun → approves on tests alone. Record both PR comment URLs below this step.
 
+DEFERRED (user decision 2026-09-24): needs an armed web repo chosen by the user; lens built and stub-tested, live proof pending.
+
 ---
 
 ### Task 9 (v1.3): Jev gates — `jev.py`, batteries, shadow mode

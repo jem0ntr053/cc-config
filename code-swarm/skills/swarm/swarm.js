@@ -23,6 +23,7 @@ const TEST_CMD = config.test_cmd ?? "pytest -q"
 const MAIN = config.main_branch ?? "main"
 const SCA_CMD = config.sca_cmd ?? ""               // e.g. "bandit -q -r ."
 const LANGS = config.langs ?? ["python"]
+const APP = config.app ?? null                     // { start_cmd, url, ready_wait_s } → pr-verifier's live-app lens
 
 // ── Schemas ───────────────────────────────────────────────────────────────────
 
@@ -177,6 +178,7 @@ const CONV = [
   SCA_CMD ? `Security scan command: ${SCA_CMD}.` : `No security scan command configured; skip SCA, note it.`,
   `Languages: ${LANGS.join(", ")}.`,
   CONV_DOC ? `Read ${CONV_DOC} before anything else.` : `No repo conventions doc; follow standard git flow.`,
+  APP ? `App: start with "${APP.start_cmd}", url ${APP.url}, wait ${APP.ready_wait_s ?? 10}s before testing.` : "No app block; skip the live-app lens.",
 ].join("\n")
 const findings = []
 const collect = r => { if (r && Array.isArray(r.findings)) findings.push(...r.findings) }

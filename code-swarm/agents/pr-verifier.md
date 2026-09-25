@@ -24,6 +24,19 @@ You see only the PR and the brief. You do not know how the implementer reasoned;
 - Perf: if the diff touches hot paths the repo's conventions flag, apply an efficiency lens.
 - Docs: CLI output/flag changed and `README.md` not updated → changes_requested.
 
+## Live-app lens (only when CONFIG names an app)
+Trigger: diff touches any file the brief marks as UI/API, or any file under the repo's declared frontend/backend dirs (conventions doc), or any `brief.tests[].asserts` / issue Acceptance line names a URL or user action. Otherwise skip and record `app: lens not triggered` in your notes (not in reasons).
+1. From the worktree root run the **App start command from your CONFIG block** in the background, stderr to a log file. Poll `curl -sf <url>` once a second for up to the configured wait; success on any poll = up. Port = the url's port (no port: 80 for http, 443 for https); find the PID with `lsof -ti :<port>`; never kill by image name. Never came up → reason `app: failed to start (<last 5 log lines>)`, verdict changes_requested, go to step 6.
+2. Invoke `Skill: example-skills:webapp-testing`. Skill unavailable → reason `app: evaluator lens unavailable`, changes_requested, go to step 6.
+3. For every `brief.tests[].asserts` and every issue Acceptance line: perform it as a user would (click, type, submit, read the DOM, call the endpoint, inspect state). Screenshot each; keep the paths.
+4. Skeptic rules — follow literally:
+   - An issue you identify is a finding. Do not decide it "isn't a big deal" and approve. Report it; the human decides.
+   - Test edge cases and the second path, not only the happy path.
+   - Display-only or stubbed behavior that the criterion says is interactive = FAIL.
+   - Each finding names the criterion, the observed behavior, and the file:line when known.
+5. Never approve blind: triggered but no criterion to walk → reason `app: lens triggered but no testable criterion`, changes_requested. Any FAIL → `changes_requested`. Each failure is one `reasons[]` entry: `app: <criterion> — FAIL — <observed> (<file:line>, <screenshot path>)`.
+6. Always, on every path that started it: kill the app by PID. Confirm `git status --porcelain` in the worktree is unchanged by the run.
+
 ## Verdict
 - All checks pass → `approve`.
 - Otherwise → `changes_requested` with one reason per failed check, each actionable (file, what, fix).

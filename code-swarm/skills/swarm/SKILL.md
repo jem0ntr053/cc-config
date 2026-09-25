@@ -38,7 +38,7 @@ fi
 OUT=$(eval "$TEST_CMD" 2>&1) || { printf '%s\n' "$OUT" | tail -5; echo "PRE-FLIGHT: baseline red ($TEST_CMD)"; exit 1; }
 echo "PRE-FLIGHT OK (armed=$ARMED)"
 jq -c '{root: $root, test_cmd, main_branch: (.main_branch // "main"), sca_cmd: (.sca_cmd // ""),
-        langs: (.langs // ["python"]), conventions: (.conventions // ""),
+        langs: (.langs // ["python"]), conventions: (.conventions // ""), app: (.app // null),
         labels: ({ready: "agent-ready", feature: "feature", pr_open: "pr-open", design_review: "design-review",
                   needs_human: "needs-human", found: "swarm-found"} + (.labels // {}))}' --arg root "$ROOT" .swarm.json
 ```
