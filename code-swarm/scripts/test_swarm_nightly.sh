@@ -7,7 +7,7 @@ T="$(mktemp -d)"; trap 'rm -rf "$T"' EXIT
 mkdir -p "$T/bin"
 cat > "$T/bin/claude" <<'EOF'
 #!/usr/bin/env bash
-printf '%s|%s\n' "$PWD" "$*" >> "$STUB_CALLS"
+printf '%s|%s|wait=%s\n' "$PWD" "$*" "${CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS:-unset}" >> "$STUB_CALLS"
 [ -n "${STUB_DIRTY:-}" ] && [ "$PWD" = "$STUB_DIRTY" ] && echo changed >> tracked.txt
 [ "$PWD" = "${STUB_FAIL:-}" ] && [[ "$*" == *--audit* ]] && exit 1
 exit 0
@@ -40,6 +40,8 @@ grep -q "^$T/opted|-p /swarm --dry-run " "$T/calls" || fail "no dry-run call"
 grep -vE '\|-p /swarm --(audit|dry-run) ' "$T/calls" && fail "an implement-capable call was made"
 # every call has a permission mode and blocks pushes; only the dry-run blocks issue creation
 grep -v -- '--permission-mode auto' "$T/calls" && fail "call without permission mode"
+# headless -p kills background workflows after 600 s; the ceiling is raised but stays finite
+grep -v '|wait=7200000$' "$T/calls" && fail "call without the 2 h CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS"
 grep -v 'Bash(git push:\*)' "$T/calls" && fail "call without push block"
 grep -- '--audit' "$T/calls" | grep -q 'gh issue create' && fail "audit cannot file findings"
 grep -- '--dry-run' "$T/calls" | grep -q 'Bash(gh issue create:\*)' || fail "dry-run may create issues"

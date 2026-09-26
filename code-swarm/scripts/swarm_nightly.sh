@@ -7,6 +7,9 @@ command -v claude >/dev/null || export PATH="$HOME/.local/bin:/opt/homebrew/bin:
 read -ra REPOS <<< "${SWARM_REPOS:-/Users/montrose/Developer/GitRepositories/daily-operating-system /Users/montrose/Developer/GitRepositories/AutoCrate}"
 TOPIC="${SWARM_NTFY_TOPIC:?set SWARM_NTFY_TOPIC}"
 LOG="${SWARM_NIGHTLY_LOG:-/tmp/swarm-nightly.log}"
+# headless -p kills a background Workflow after 600 s by default; audits run longer.
+# 2 h, not 0 (forever): a hung run must still end so the digest posts.
+export CLAUDE_CODE_PRINT_BG_WAIT_CEILING_MS=7200000
 # headless sessions refuse every tool without a permission mode; these writes are never needed at night.
 # ponytail: a denylist, so a Bash write not named here is auto-approved; switch to --allowedTools if a run ever writes code.
 NO_CODE=(Edit Write NotebookEdit "Bash(gh pr:*)" "Bash(git push:*)" "Bash(/usr/bin/git push:*)"

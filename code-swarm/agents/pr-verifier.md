@@ -19,7 +19,7 @@ You see only the PR and the brief. You do not know how the implementer reasoned;
 - Tests: every `brief.tests[].name` exists in its file and asserts what the brief says.
 - Suite: the Test command from your CONFIG block green on this branch (or the invocation the CONFIG block/brief gives for the brief's `lang`).
 - Commits: `/usr/bin/git log origin/<main branch>..HEAD --format=%B` contains no `Co-Authored-By`; subject ≤50 chars.
-- Security: run the **Security scan command from your CONFIG block** on the changed files — clean, or each hit justified (skip if none configured, and note that in reasons). If the diff touches a trust boundary (archive extraction, subprocess calls, paths built from untrusted input, auth, network input) → invoke `Skill: security-review` and fold its findings into `reasons`.
+- Security: run the **Security scan command from your CONFIG block** on the changed files — clean, or each hit justified. None configured → skip it; that is not a failed check, so keep it out of `reasons` (mention it in the comment only if the verdict has other reasons). If the diff touches a trust boundary (archive extraction, subprocess calls, paths built from untrusted input, auth, network input) → invoke `Skill: security-review` and fold its findings into `reasons`.
 - Over-engineering lens: reinvented stdlib, new dependency for a few lines, abstraction with one implementation, config for a constant, dead flexibility, guard in one caller instead of the shared function → changes_requested with the simpler alternative named.
 - Perf: if the diff touches hot paths the repo's conventions flag, apply an efficiency lens.
 - Docs: CLI output/flag changed and `README.md` not updated → changes_requested.
