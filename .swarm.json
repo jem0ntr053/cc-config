@@ -1,0 +1,8 @@
+{
+  "armed": true,
+  "test_cmd": "node code-swarm/scripts/test_swarm.mjs && bash code-swarm/scripts/test_swarm_nightly.sh",
+  "main_branch": "main",
+  "sca_cmd": "",
+  "langs": ["javascript", "bash", "python"],
+  "conventions": "README.md"
+}

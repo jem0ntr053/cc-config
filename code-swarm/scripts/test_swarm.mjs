@@ -1,0 +1,118 @@
+// Runs swarm.js under a stub Workflow runtime and asserts what it asks agents to do.
+// Doubles as the syntax check: `node --check` rejects Workflow scripts' top-level return.
+// Usage: node code-swarm/scripts/test_swarm.mjs
+import { readFileSync } from "node:fs"
+import assert from "node:assert/strict"
+
+const SRC = readFileSync(new URL("../skills/swarm/swarm.js", import.meta.url), "utf8")
+  .replace(/^export const meta/m, "const meta")
+const AsyncFunction = (async () => {}).constructor
+const script = new AsyncFunction("args", "agent", "parallel", "pipeline", "phase", "log", SRC)
+
+const CANNED = {
+  "issue-triager": { needs_human: false, reason: "", findings: [],
+    brief: { issue: 9, branch: "b", commit_subject: "s", files: ["a.py"], steps: [], tests: [], targeted_pytest: "t", risk: "low", lang: "python" } },
+  "feature-architect": { skip: false, approach: "x", findings: [] },
+}
+
+// respond(type, prompt) may override the canned reply; return undefined to fall through
+async function run(args, respond = () => undefined) {
+  const calls = []
+  const agent = async (prompt, opts) => {
+    calls.push({ prompt, ...opts })
+    const type = opts.agentType.replace(/^code-swarm:/, "")
+    const r = respond(type, prompt)
+    if (r !== undefined) return r
+    return CANNED[type] ?? { findings: [], created: [], skipped_duplicate: [] }
+  }
+  const result = await script(args, agent, fns => Promise.all(fns.map(f => f())),
+    (items, fn) => Promise.all(items.map(fn)), () => {}, () => {})
+  return { calls, result }
+}
+
+const config = { root: "/r/dayos", test_cmd: ".venv/bin/python -m pytest -q", main_branch: "main", sca_cmd: "", langs: ["python"], conventions: "CLAUDE.md" }
+
+// config flows into every prompt; agents resolve inside the plugin namespace
+{
+  const { calls } = await run({ issues: [9], dryRun: true, config })
+  assert.ok(calls.length > 0)
+  for (const c of calls) {
+    assert.match(c.prompt, /Repo root: \/r\/dayos/)
+    assert.match(c.prompt, /Test command: \.venv\/bin\/python -m pytest -q/)
+    assert.match(c.prompt, /Read CLAUDE\.md before anything else/)
+    assert.match(c.prompt, /No security scan command configured/)
+    assert.match(c.agentType, /^code-swarm:/)
+    assert.match(c.prompt, /Run git as \/usr\/bin\/git/)   // bare git → rtk git, which worktree isolation refuses
+  }
+}
+
+// dry-run is read-only: no design agents, triager told not to write to GitHub
+{
+  const { calls, result } = await run({ issues: [9], features: [21], dryRun: true, config })
+  assert.deepEqual(calls.map(c => c.agentType), ["code-swarm:issue-triager"])
+  assert.match(calls[0].prompt, /DRY RUN/)
+  assert.equal(result.dryRun, true)
+  assert.equal(result.briefs.length, 1)
+}
+
+// a real run still designs features, and its triage prompt carries no dry-run marker
+{
+  const { calls } = await run({ issues: [], features: [21], config })
+  assert.ok(calls.some(c => c.agentType === "code-swarm:feature-architect"))
+  assert.ok(calls.every(c => !/DRY RUN/.test(c.prompt)))
+}
+
+// --build: planner writes the spec, then one groomer per feature in order, citing earlier issue numbers
+{
+  const plan = { spec_path: "docs/specs/2026-09-24-todo.md", pr_url: "https://x/pull/5", findings: [],
+    features: [{ n: 1, title: "tasks", depends_on: [] }, { n: 2, title: "tags", depends_on: [1] }, { n: 3, title: "digest", depends_on: [1, 2] }] }
+  const issueFor = { 1: 101, 3: 103 }   // feature 2's groomer fails
+  const { calls, result } = await run({ build: "todo list with tags", date: "2026-09-24", config }, (type, prompt) => {
+    if (type === "product-planner") return plan
+    if (type === "issue-groomer") {
+      const n = Number(prompt.match(/feature: (\d+)/)[1])
+      return issueFor[n] ? { created: [{ number: issueFor[n], title: `f${n}` }], skipped_duplicate: [] } : null
+    }
+  })
+  assert.deepEqual(calls.map(c => c.agentType),
+    ["code-swarm:product-planner", "code-swarm:issue-groomer", "code-swarm:issue-groomer", "code-swarm:issue-groomer"])
+  assert.match(calls[0].prompt, /todo list with tags/)
+  assert.equal(calls[0].isolation, "worktree")
+  assert.match(calls[1].prompt, /depends_on issues: none/)
+  assert.match(calls[3].prompt, /depends_on issues: 101\./)     // feature 2 unfiled → not cited
+  assert.equal(result.build, true)
+  assert.equal(result.spec_path, plan.spec_path)
+  assert.equal(result.pr_url, plan.pr_url)
+  assert.deepEqual(result.issues, [{ number: 101, title: "f1", feature: 1 }, { number: 103, title: "f3", feature: 3 }])
+  assert.deepEqual(result.unfiled, [{ feature: 2, title: "tags", anchor: "docs/specs/2026-09-24-todo.md#feature-2" }])
+  assert.ok(!calls.some(c => c.agentType === "code-swarm:issue-filer"))
+}
+
+// --build: planner returns nothing → abort, no issues filed
+{
+  const { calls, result } = await run({ build: "x", config }, type => type === "product-planner" ? null : undefined)
+  assert.equal(calls.length, 1)
+  assert.equal(result.build, true)
+  assert.match(result.error, /planner returned no spec/)
+}
+
+// --build: planner aborts on purpose (e.g. slug exists) → its reason reaches the result
+{
+  const why = { title: "slug exists", body: "docs/specs/2026-01-01-x.md", kind: "debt", source: "build" }
+  const { calls, result } = await run({ build: "x", config },
+    type => type === "product-planner" ? { spec_path: "", pr_url: "", features: [], findings: [why] } : undefined)
+  assert.equal(calls.length, 1)
+  assert.match(result.error, /planner returned no spec/)
+  assert.deepEqual(result.findings, [why])
+}
+
+// app block → every prompt tells the verifier how to start the app; absent → lens explicitly off
+{
+  const withApp = { ...config, app: { start_cmd: "npm run dev", url: "http://localhost:5173" } }
+  const { calls } = await run({ issues: [9], dryRun: true, config: withApp })
+  assert.match(calls[0].prompt, /App: start with "npm run dev", url http:\/\/localhost:5173, wait 10s before testing\./)
+  const { calls: plain } = await run({ issues: [9], dryRun: true, config })
+  assert.match(plain[0].prompt, /No app block; skip the live-app lens\./)
+}
+
+console.log("OK")
