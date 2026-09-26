@@ -1,5 +1,5 @@
 {
   "name": "code-swarm",
   "description": "Cross-repo issue swarm: agent-ready GitHub issues become verified PRs (human merges). Opt in per repo with .swarm.json.",
-  "version": "0.1.0"
+  "version": "0.1.1"
 }
