@@ -7,7 +7,7 @@ Add `.swarm.json` at the repo root (schema: `skills/swarm/swarm.schema.json`):
 
 ```json
 { "armed": false, "test_cmd": ".venv/bin/python -m pytest -q", "main_branch": "main",
-  "sca_cmd": "", "langs": ["python"], "conventions": "CLAUDE.md" }
+  "sca_cmd": "", "langs": ["python"], "conventions": "CLAUDE.md", "jev": { "mode": "shadow" } }
 ```
 
 `armed: false` allows only `--dry-run`, `--audit` and `--build`. The repo also needs the labels
@@ -35,3 +35,5 @@ and appends a line to `~/.cache/code-swarm/jev.jsonl` (`JEV_LOG` overrides). Key
 env or `~/.config/typesafe/.env`. One-line SDK setup:
 `python3 -m venv ~/.cache/code-swarm/venv && ~/.cache/code-swarm/venv/bin/pip install typesafe-sdk`
 (Homebrew python refuses `pip --user`; jev.py finds the venv's site-packages itself).
+
+`.swarm.json` `jev.mode` (`shadow` default, `enforce`, `off`) drives gate 2 in `/swarm` pre-flight: shadow adds a `jev` column to the queue table; enforce relabels/drops issues per the spec rules and routes `tier: opus` issues to an opus implementer; off skips the CLI.

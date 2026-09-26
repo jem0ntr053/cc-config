@@ -39,9 +39,11 @@ OUT=$(eval "$TEST_CMD" 2>&1) || { printf '%s\n' "$OUT" | tail -5; echo "PRE-FLIG
 echo "PRE-FLIGHT OK (armed=$ARMED)"
 jq -c '{root: $root, test_cmd, main_branch: (.main_branch // "main"), sca_cmd: (.sca_cmd // ""),
         langs: (.langs // ["python"]), conventions: (.conventions // ""), app: (.app // null),
+        jev: {mode: (.jev.mode // "shadow"), cli: $cli},
         labels: ({ready: "agent-ready", feature: "feature", pr_open: "pr-open", design_review: "design-review",
-                  needs_human: "needs-human", found: "swarm-found"} + (.labels // {}))}' --arg root "$ROOT" .swarm.json
+                  needs_human: "needs-human", found: "swarm-found"} + (.labels // {}))}' --arg root "$ROOT" --arg cli "<base directory>/../../scripts/jev.py" .swarm.json
 ```
+The coordinator substitutes the skill's base directory (the "Base directory for this skill" line shown when the skill loaded) into `--arg cli` before running the block; `<base>/../../scripts/jev.py` resolves to `code-swarm/scripts/jev.py`.
 The last line prints the `config` object for step 4 — pass it through verbatim. Dry-run and audit are read-only, so they may run from any branch with a dirty tree (needed to smoke-test before merge). Untracked files are allowed (they are not swept into worktrees). Baseline runs once here; agents run targeted tests plus one full run before opening a PR.
 
 ## 3. Build queue
@@ -62,15 +64,33 @@ gh issue list --label "$FEATURE" --state open --json number,title,labels \
 
 Print the queue and features as a table. In an interactive session, ask once: "Launch?" — proceed on yes. Empty queue and empty features and neither `--audit` nor `--docs` → say "nothing to do" and stop.
 
+### Gate 2 (Jev pre-triage)
+Skipped entirely when the queue is empty or `--build`/`--audit`/`--docs`.
+```bash
+cd "$(git rev-parse --show-toplevel)"
+MODE=$(jq -r '.jev.mode // "shadow"' .swarm.json)
+JEV="<base directory>/../../scripts/jev.py"
+```
+For each queued issue N: `gh issue view N --json title,body > /tmp/swarm-jev-N.json` then
+`OUT=$(python3 "$JEV" issue_pretriage /tmp/swarm-jev-N.json --gate pretriage --mode "$MODE")`.
+
+Interpretation:
+(a) `MODE=off` or `OUT` has `.skipped == true` → queue unchanged, `jev` column shows `—`.
+(b) shadow → queue table gains a column `jev` formatted `<kind.choice>/<complexity>/<risk>/<tier>` (tier computed with the >= 1.5 rule); nothing else changes; all issues launch as bare numbers or `{n, tier}` — either is accepted.
+(c) enforce → apply the gate 2 rules before launch: has_* missing or injection → `gh issue comment N --body "swarm gate 2: <reason>"` then `gh issue edit N --add-label needs-human --remove-label agent-ready`, drop N from the queue; design_question conf > 0.7 → `gh issue edit N --add-label feature --remove-label agent-ready`, drop N from the queue; remaining issues launch as `[{n: N, tier: "opus"|"sonnet"}]`. On `--dry-run` enforce must not write to GitHub: print what would have happened and keep the issue in the queue.
+
+Gate 2 never blocks a run: a skipped or failed Jev call means every issue goes to the triager as today.
+
 ## 4. Launch
 Call the Workflow tool. `scriptPath` is `swarm.js` in this skill's base directory (the "Base directory for this skill" line shown when the skill loaded):
 ```
 Workflow({
   scriptPath: "<base directory>/swarm.js",
-  args: { issues: [17, 18], features: [21], dryRun: false, audit: false, docs: false, date: "<today YYYY-MM-DD>",
+  args: { issues: [17, {n: 18, tier: "opus"}], features: [21], dryRun: false, audit: false, docs: false, date: "<today YYYY-MM-DD>",
           config: <object printed by pre-flight> }
 })
 ```
+`issues` items are a bare number or `{n, tier}`; tier from gate 2 in enforce mode, otherwise omitted.
 For `--build`: `args: { build: "<prompt verbatim>", date: "<today YYYY-MM-DD>", config: <object printed by pre-flight> }`. In an interactive session, confirm the prompt and slug once before launching.
 `args` is a JSON object, never a string. Wait for the completion notification; do not poll.
 

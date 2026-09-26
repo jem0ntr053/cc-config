@@ -13,6 +13,8 @@ const CANNED = {
   "issue-triager": { needs_human: false, reason: "", findings: [],
     brief: { issue: 9, branch: "b", commit_subject: "s", files: ["a.py"], steps: [], tests: [], targeted_pytest: "t", risk: "low", lang: "python" } },
   "feature-architect": { skip: false, approach: "x", findings: [] },
+  "pr-verifier": { verdict: "approve", reasons: [], findings: [] },
+  "issue-implementer": { status: "pr_open", pr_url: "u", pr_number: 1, branch: "b", findings: [] },
 }
 
 // respond(type, prompt) may override the canned reply; return undefined to fall through
@@ -113,6 +115,38 @@ const config = { root: "/r/dayos", test_cmd: ".venv/bin/python -m pytest -q", ma
   assert.match(calls[0].prompt, /App: start with "npm run dev", url http:\/\/localhost:5173, wait 10s before testing\./)
   const { calls: plain } = await run({ issues: [9], dryRun: true, config })
   assert.match(plain[0].prompt, /No app block; skip the live-app lens\./)
+}
+
+// jev config -> CONV line in every prompt
+{
+  const { calls } = await run({ issues: [9], dryRun: true, config: { ...config, jev: { mode: "shadow", cli: "/p/jev.py" } } })
+  assert.ok(calls.length > 0)
+  for (const c of calls) assert.match(c.prompt, /Jev gates: mode shadow; CLI \/p\/jev\.py\./)
+}
+
+// no jev block or mode off -> "Jev gates off."
+{
+  const { calls: noJev } = await run({ issues: [9], dryRun: true, config })
+  assert.match(noJev[0].prompt, /Jev gates off\./)
+  const { calls: offJev } = await run({ issues: [9], dryRun: true, config: { ...config, jev: { mode: "off", cli: "/p/jev.py" } } })
+  assert.match(offJev[0].prompt, /Jev gates off\./)
+}
+
+// issues accept {n, tier}; implementer model from tier
+{
+  const { calls } = await run({ issues: [{ n: 5, tier: "opus" }, 6], config }, (type, prompt) => {
+    if (type === "issue-triager") {
+      const n = Number(prompt.match(/#(\d+)/)[1])
+      return { needs_human: false, reason: "", findings: [],
+        brief: { issue: n, branch: `b${n}`, commit_subject: "s", files: [`f${n}.py`], steps: [], tests: [], targeted_pytest: "t", risk: "low", lang: "python" } }
+    }
+    if (type === "issue-implementer") return { status: "pr_open", pr_url: "u", pr_number: 1, branch: "b", findings: [] }
+    if (type === "pr-verifier") return { verdict: "approve", reasons: [], findings: [] }
+  })
+  assert.ok(calls.some(c => /Triage issue #5/.test(c.prompt)))
+  assert.ok(calls.some(c => /Triage issue #6/.test(c.prompt)))
+  assert.equal(calls.find(c => c.label === "impl:#5").model, "opus")
+  assert.equal(calls.find(c => c.label === "impl:#6").model, "sonnet")
 }
 
 console.log("OK")

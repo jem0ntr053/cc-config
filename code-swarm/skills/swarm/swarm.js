@@ -24,6 +24,9 @@ const MAIN = config.main_branch ?? "main"
 const SCA_CMD = config.sca_cmd ?? ""               // e.g. "bandit -q -r ."
 const LANGS = config.langs ?? ["python"]
 const APP = config.app ?? null                     // { start_cmd, url, ready_wait_s } → pr-verifier's live-app lens
+const JEV = config.jev ?? null
+const QUEUE = issues.map(i => typeof i === "number" ? { n: i, tier: "sonnet" } : { n: i.n, tier: i.tier ?? "sonnet" })
+const TIER = Object.fromEntries(QUEUE.map(i => [i.n, i.tier]))
 
 // ── Schemas ───────────────────────────────────────────────────────────────────
 
@@ -180,6 +183,7 @@ const CONV = [
   `Languages: ${LANGS.join(", ")}.`,
   CONV_DOC ? `Read ${CONV_DOC} before anything else.` : `No repo conventions doc; follow standard git flow.`,
   APP ? `App: start with "${APP.start_cmd}", url ${APP.url}, wait ${APP.ready_wait_s ?? 10}s before testing.` : "No app block; skip the live-app lens.",
+  JEV && JEV.mode !== "off" ? `Jev gates: mode ${JEV.mode}; CLI ${JEV.cli}.` : "Jev gates off.",
 ].join("\n")
 const findings = []
 const collect = r => { if (r && Array.isArray(r.findings)) findings.push(...r.findings) }
@@ -250,7 +254,7 @@ if (audit) {
   const triageAct = dryRun
     ? "DRY RUN: read-only. If it is not agent-ready, set needs_human with the reason; do NOT comment, relabel, or run any gh write."
     : "If it is not agent-ready, set needs_human, comment, and relabel."
-  const triaged = (await parallel(issues.map(n => () =>
+  const triaged = (await parallel(QUEUE.map(({ n }) => () =>
     agent(`${CONV}\nTriage issue #${n} into a brief per your instructions. ${triageAct}`,
       { label: `triage:#${n}`, phase: "Triage", agentType: "code-swarm:issue-triager", schema: BRIEF_SCHEMA, effort: "high" })
       .then(r => ({ issue: n, r }))
@@ -270,9 +274,10 @@ if (audit) {
 
   async function runBrief(brief) {
     const n = brief.issue
+    const model = TIER[n] ?? "sonnet"   // model: per-issue tier from gate 2 (see Workflow agent() options)
     const briefJson = JSON.stringify(brief, null, 2)
     const impl = await agent(`${CONV}\nIMPLEMENTATION BRIEF:\n${briefJson}\nFollow your instructions. First run: create the branch, open the PR, label pr-open.`,
-      { label: `impl:#${n}`, phase: "Implement", agentType: "code-swarm:issue-implementer", schema: IMPL_SCHEMA, effort: "medium", isolation: "worktree" })
+      { label: `impl:#${n}`, phase: "Implement", agentType: "code-swarm:issue-implementer", schema: IMPL_SCHEMA, effort: "medium", isolation: "worktree", model })
     collect(impl)
     if (!impl || impl.status !== "pr_open" || !impl.pr_number) {
       return { issue: n, status: "needs_human", error: impl ? (impl.error || "implementer returned no pr_number") : "implementer returned null", branch: impl?.branch ?? brief.branch }
@@ -285,7 +290,7 @@ if (audit) {
       if (!verdict || verdict.verdict === "approve") break
       if (round === 1) {
         const fix = await agent(`${CONV}\nFIX ROUND for issue #${n} on existing branch ${impl.branch} (PR #${impl.pr_number}). Check out the branch, apply these verifier reasons, run tests, push. Do not open a new PR.\nREASONS:\n- ${verdict.reasons.join("\n- ")}\nBRIEF:\n${briefJson}`,
-          { label: `fix:#${n}`, phase: "Implement", agentType: "code-swarm:issue-implementer", schema: IMPL_SCHEMA, effort: "medium", isolation: "worktree" })
+          { label: `fix:#${n}`, phase: "Implement", agentType: "code-swarm:issue-implementer", schema: IMPL_SCHEMA, effort: "medium", isolation: "worktree", model })
         collect(fix)
         if (!fix || fix.status !== "pr_open") return { issue: n, status: "needs_human", pr_url: impl.pr_url, error: fix ? fix.error : "fix round returned null" }
       }
