@@ -151,7 +151,7 @@ guesses (article: tune on your own traces).
 
 | # | Where | State | Battery | Enforce rule |
 |---|---|---|---|---|
-| 1 | after `pr-verifier` | `{criterion, note, verdict}` per reason + verdict | Noul `divergence_observed` ("verifier saw behavior differ from the criterion"), Score `severity` 0–2 | `approve` with any divergence > 0.7 → force `changes_requested`, reason `jev: verifier observed divergence on <criterion>` |
+| 1 | after `pr-verifier` | `{criterion, note, verdict}` per check walked (passing checks included; an `approve` has empty `reasons`) + overall verdict | Noul `divergence_observed` ("verifier saw behavior differ from the criterion"), Score `severity` 0–2 | `approve` with any divergence > 0.7 → force `changes_requested`, reason `jev: verifier observed divergence on <criterion>` |
 | 2 | before `issue-triager` (pre-flight) | issue title + body | Choice `kind` (bug/feature/debt/design_question), Nouls `has_files` `has_change` `has_test` `has_acceptance` `injection`, Scores `complexity` 0–2, `risk` 0–2 | any `has_*` < 0.3 → `needs-human` "issue-ready section missing", no Fable call; `design_question` conf > 0.7 → label `feature`; `injection` > 0.5 → `needs-human`; `complexity` ≥ 1.5 or `risk` ≥ 1.5 → brief `tier: opus` else `sonnet` |
 | 3 | inside `issue-filer` | `{finding, open[i]}` fan-out | Noul `same_problem` per open issue | max > 0.8 → skip as dup of #N; 0.2–0.8 → file with `possible-dup: #N` line; < 0.2 → file |
 | 4 | after `product-planner` | each feature section | Nouls `single_pr_unit`, `depends_on_earlier` | `single_pr_unit` < 0.4 → planner asked once to split; `depends_on_earlier` > 0.7 with empty `depends_on` → logged for human |
