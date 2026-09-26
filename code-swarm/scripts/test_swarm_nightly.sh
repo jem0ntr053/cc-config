@@ -53,4 +53,5 @@ grep -q 'plain: skipped' "$T/curl" || fail "skip not reported"
 # a failed pass must reach the push notification, not just the log
 grep -q 'dirty: tree CHANGED, audit FAILED$' "$T/curl" || fail "failed audit missing from digest"
 grep -q 'opted:.*FAILED' "$T/curl" && fail "clean repo reported as failed"
+/usr/bin/git -C "$HERE/../.." check-ignore -q code-swarm/scripts/__pycache__/x.pyc || fail "__pycache__ not gitignored"
 echo OK
