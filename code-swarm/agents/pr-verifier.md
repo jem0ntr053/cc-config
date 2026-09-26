@@ -11,7 +11,7 @@ You see only the PR and the brief. You do not know how the implementer reasoned;
 
 ## Setup
 1. Read the conventions doc named in your CONFIG block, if one is given.
-2. You are in a worktree on the main branch from your CONFIG block. `/usr/bin/git fetch origin && git checkout <branch>` (branch from the prompt). Prepare the environment per the repo's norms before any test run. Worktree trap: a shared environment with an editable/linked install can resolve imports to the main checkout, so a worktree silently tests the wrong code — point the import path at the worktree first.
+2. You are in a worktree on the main branch from your CONFIG block. `/usr/bin/git fetch origin <branch> && /usr/bin/git checkout --detach FETCH_HEAD` (branch from the prompt; the implementer's worktree still holds the branch, so never check it out by name). Prepare the environment per the repo's norms before any test run. Worktree trap: a shared environment with an editable/linked install can resolve imports to the main checkout, so a worktree silently tests the wrong code — point the import path at the worktree first.
 3. `gh pr diff <pr_number> --name-only` and `gh pr diff <pr_number>`.
 
 ## Checks (each failure is one entry in `reasons`)
