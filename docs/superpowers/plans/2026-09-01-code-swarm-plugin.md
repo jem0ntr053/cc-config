@@ -760,6 +760,8 @@ git add code-swarm/scripts code-swarm/skills/swarm code-swarm/agents
 git commit -m "feat(code-swarm): Jev gates (shadow mode) + jev.py CLI"
 ```
 
+BUILT 2026-09-26 by the swarm itself on cc-config (issues #28/#29/#30 → PRs #31/#33/#39, all merged; plugin 0.3.0). Deviations: SDK in a venv at `~/.cache/code-swarm/venv` (Homebrew python refuses `pip --user`); gate 1 records every check the verifier runs, not only reasons (#40). Open: #41 (gate 3 call volume, decide before enforce), #42 (.gitignore). Gates run in shadow by default.
+
 - [ ] **Step 7: shadow review after 5 runs**
 
 `python3 -c` one-liner over `~/.cache/code-swarm/jev.jsonl` grouping by gate: rows where Jev's enforce-rule would have differed from `agent_did`. Promote a gate to `enforce` in the pilot repo's `.swarm.json` only when those rows are ones the human agrees with. Record the decision per gate in this plan.
