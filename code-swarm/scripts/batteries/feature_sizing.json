@@ -1,0 +1,20 @@
+{
+  "questions": {
+    "single_pr_unit": {
+      "type": "noul",
+      "instructions": "Can this feature section be delivered as one pull request that a coding agent finishes in one session, with one test file and one acceptance check?",
+      "criteria": {
+        "true": "It is one bounded unit of work.",
+        "false": "It bundles several independent changes or is too large for one PR."
+      }
+    },
+    "depends_on_earlier": {
+      "type": "noul",
+      "instructions": "Does this feature section require an earlier section of the same spec to be implemented first?",
+      "criteria": {
+        "true": "It builds on code or data an earlier section introduces.",
+        "false": "It stands alone."
+      }
+    }
+  }
+}

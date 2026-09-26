@@ -1,0 +1,12 @@
+{
+  "questions": {
+    "same_problem": {
+      "type": "noul",
+      "instructions": "Do `finding` and `open` describe the same underlying problem in the same part of the code, such that fixing one fixes the other?",
+      "criteria": {
+        "true": "They are the same problem; filing `finding` would duplicate `open`.",
+        "false": "They are different problems, or the same symptom in unrelated code."
+      }
+    }
+  }
+}
