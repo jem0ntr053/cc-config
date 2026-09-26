@@ -25,4 +25,13 @@ sets `SWARM_NTFY_TOPIC`), which is not committed. Log: `/tmp/swarm-nightly.log`.
 Load: `launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.montrose.swarm-nightly.plist`.
 
 ## Checks
-`node scripts/test_swarm.mjs` and `bash scripts/test_swarm_nightly.sh` (both stubbed, no real agents).
+`node scripts/test_swarm.mjs`, `bash scripts/test_swarm_nightly.sh` and `python3 scripts/test_jev.py`
+(all stubbed/offline, no real agents, no key).
+
+## Jev gates
+`scripts/jev.py <battery> <state.json> [--gate <name>] [--mode shadow|enforce|off] [--agent-did '<json>']`
+prints Jev's answers as JSON, fails open (`{"skipped": true, ...}`, exit 0) with no key or any error,
+and appends a line to `~/.cache/code-swarm/jev.jsonl` (`JEV_LOG` overrides). Key: `TYPESAFE_API_KEY`
+env or `~/.config/typesafe/.env`. One-line SDK setup:
+`python3 -m venv ~/.cache/code-swarm/venv && ~/.cache/code-swarm/venv/bin/pip install typesafe-sdk`
+(Homebrew python refuses `pip --user`; jev.py finds the venv's site-packages itself).

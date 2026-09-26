@@ -1,6 +1,6 @@
 {
   "armed": true,
-  "test_cmd": "node code-swarm/scripts/test_swarm.mjs && bash code-swarm/scripts/test_swarm_nightly.sh",
+  "test_cmd": "node code-swarm/scripts/test_swarm.mjs && bash code-swarm/scripts/test_swarm_nightly.sh && python3 code-swarm/scripts/test_jev.py",
   "main_branch": "main",
   "sca_cmd": "",
   "langs": ["javascript", "bash", "python"],
