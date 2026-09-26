@@ -76,7 +76,7 @@
     {
       "id": 8,
       "subject": "Task 9 (v1.3): Jev gates — jev.py, batteries, shadow mode",
-      "status": "pending",
+      "status": "in_progress",
       "blockedBy": [
         3,
         6,
@@ -85,5 +85,5 @@
       "description": "**Goal:** Four Jev gates (verifier leniency, issue pre-triage + tier routing, finding dedup, feature sizing) in shadow mode; fail open on missing key/API error; enforce only via .swarm.json jev.mode.\n\n**Files:** code-swarm/scripts/jev.py, scripts/batteries/*.json, scripts/test_jev.py (create); swarm.schema.json, SKILL.md, swarm.js, agents pr-verifier/issue-filer/product-planner (modify)\n\n**Prereq:** TYPESAFE_API_KEY in ~/.config/typesafe/.env (human, from 1Password app)\n\n**Verify:** python3 code-swarm/scripts/test_jev.py && echo OK\n\n```json:metadata\n{\"files\": [\"/Users/montrose/cc-config/code-swarm/scripts/jev.py\", \"/Users/montrose/cc-config/code-swarm/scripts/test_jev.py\", \"/Users/montrose/cc-config/code-swarm/skills/swarm/swarm.schema.json\", \"/Users/montrose/cc-config/code-swarm/skills/swarm/SKILL.md\", \"/Users/montrose/cc-config/code-swarm/skills/swarm/swarm.js\", \"/Users/montrose/cc-config/code-swarm/agents/pr-verifier.md\", \"/Users/montrose/cc-config/code-swarm/agents/issue-filer.md\", \"/Users/montrose/cc-config/code-swarm/agents/product-planner.md\"], \"verifyCommand\": \"cd /Users/montrose/cc-config && python3 code-swarm/scripts/test_jev.py && echo OK\", \"acceptanceCriteria\": [\"jev.py prints answers or {skipped:true} exit 0\", \"every call logged to ~/.cache/code-swarm/jev.jsonl\", \"jev.mode shadow|enforce|off, default shadow\", \"gate 2 never blocks pre-flight on Jev failure\", \"offline test passes\"]}\n```"
     }
   ],
-  "lastUpdated": "2026-09-25T06:30:00Z"
+  "lastUpdated": "2026-09-26T09:00:00Z"
 }
