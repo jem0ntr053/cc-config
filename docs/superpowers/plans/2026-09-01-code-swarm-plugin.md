@@ -748,7 +748,7 @@ After the queue is built: for each issue, `gh issue view N --json title,body` â†
 
 - [ ] **Step 5: wire gates 1, 3, 4 into agents**
 
-Add to each agent a short section "## Jev gate (CONFIG names the CLI and mode)": build the state JSON, run the CLI, in shadow do nothing further, in enforce apply the one rule from the spec table. `pr-verifier`: after computing the verdict, before posting. `issue-filer`: per finding before `gh issue create`. `product-planner`: per feature before returning; on `single_pr_unit` < 0.4 split that feature once.
+Add to each agent a short section "## Jev gate (CONFIG names the CLI and mode)": build the state JSON, run the CLI, in shadow do nothing further, in enforce apply the one rule from the spec table. `pr-verifier`: after computing the verdict, before posting; one state entry per check walked (passing ones included), not per `reasons[]` entry, otherwise an `approve` has nothing to gate. `issue-filer`: per finding before `gh issue create`. `product-planner`: per feature before returning; on `single_pr_unit` < 0.4 split that feature once.
 
 - [ ] **Step 6: schema + CONV plumbing, verify, commit**
 
