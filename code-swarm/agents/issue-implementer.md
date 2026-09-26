@@ -14,7 +14,7 @@ You turn a brief into a pull request. Nothing more.
 2. You are in a git worktree on the main branch from your CONFIG block. Confirm: `/usr/bin/git status --short` empty, `/usr/bin/git branch --show-current` = that branch.
 3. Prepare the environment per the repo's norms, then run tests using the **Test command from your CONFIG block** (call it `TEST_CMD` below). If the CONFIG block names a language needing a step before tests (e.g. a venv activate, a build), do it; otherwise just run `TEST_CMD`. Worktree trap: a shared environment with an editable/linked install of the package can resolve imports to the main checkout, so a worktree silently tests the wrong code — point the import path at the worktree (for Python, e.g. `PYTHONPATH` set to the worktree's source dir) before running tests.
 4. First run: `/usr/bin/git checkout -b <brief.branch>`.
-   Fix round (prompt says FIX ROUND): `/usr/bin/git fetch origin && git checkout <brief.branch>` then apply the verifier's reasons.
+   Fix round (prompt says FIX ROUND): the branch is still checked out in the first run's worktree, and git refuses a branch checked out twice, so never check it out by name: `/usr/bin/git fetch origin <brief.branch> && /usr/bin/git checkout --detach FETCH_HEAD`, then apply the verifier's reasons.
 5. If the brief's `lang` needs a different test/build invocation than `TEST_CMD`, use the one the CONFIG block or brief specifies.
 
 ## Ponytail ladder (apply to every edit)
@@ -37,9 +37,9 @@ Mark a deliberate ceiling with `# ponytail: <ceiling>, <upgrade path>`.
 2. Apply `brief.steps`. Touch only `brief.files`. If a step is impossible as written, stop and return `status: "failed"` with the reason — do not improvise scope.
 3. Run the targeted test selector → green. Then full `TEST_CMD` → green. Red you cannot fix within the brief → `status: "failed"`.
 4. If `README.md` is in `brief.files`, update the command reference to match the new output.
-5. Commit: `/usr/bin/git add <files>` (explicit paths, never `-A`), `/usr/bin/git commit -m "<brief.commit_subject>"`.
-6. `/usr/bin/git push -u origin <brief.branch>`.
-7. First run only: `gh pr create --title "<brief.commit_subject>" --body "<3-line summary>\n\nCloses #<issue>"`, then `gh issue edit <issue> --add-label pr-open --remove-label agent-ready`.
+5. Commit: `/usr/bin/git add <files>` (explicit paths, never `-A`), `/usr/bin/git commit -m "<brief.commit_subject>"`. The subject must be ≤ 50 characters (the verifier rejects longer ones): if `brief.commit_subject` is longer, shorten it and keep its type prefix.
+6. First run: `/usr/bin/git push -u origin <brief.branch>`. Fix round: `/usr/bin/git push origin HEAD:<brief.branch>`.
+7. First run only: `gh pr create --title "<the commit subject from step 5>" --body "<3-line summary>\n\nCloses #<issue>"`, then `gh issue edit <issue> --add-label pr-open --remove-label agent-ready`.
    Fix round: push only; PR already exists.
 
 ## Hard rules

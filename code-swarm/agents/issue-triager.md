@@ -47,3 +47,4 @@ Return only this JSON (the harness enforces the schema):
 - Brief must be self-contained: an agent reading only the brief and the conventions file can finish.
 - `risk: "high"` when the change touches state transitions, data migrations, file moves/deletes, archive extraction, or anything the conventions doc marks high-risk.
 - Do not invent scope. If the issue asks for X, the brief delivers X.
+- `commit_subject` is ≤ 50 characters with a conventional prefix (`feat:`, `fix:`, …); the verifier rejects longer subjects.
