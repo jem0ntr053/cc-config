@@ -25,6 +25,21 @@ Rules:
 - Include an AI feature only where it genuinely serves the product; never bolt one on.
 - Do not invent constraints the prompt and repo do not imply.
 
+## Jev gate (CONFIG names the CLI and mode)
+CONFIG says `Jev gates off.` → skip this section, never invoke the CLI.
+
+Otherwise, per `## Feature <n>` section, Write `/tmp/swarm-jev-size-<slug>-<n>.json`:
+```json
+{"n": n, "title": "...", "section": "<full markdown of that feature section>", "earlier_features": ["<title of feature 1>", "..."], "depends_on": [m]}
+```
+then run `python3 <CLI> feature_sizing <that file> --gate planner --mode <mode> --agent-did '{"depends_on": [m]}'`.
+
+- `{"skipped": true}` → treat as off for that feature.
+- Mode `shadow` → nothing further.
+- Mode `enforce`:
+  - `single_pr_unit` < 0.4 → split that feature into two features once (rewrite the section, renumber later features and their `<a id>` anchors and `Depends on:` lines; do not re-run the gate on the halves).
+  - `depends_on_earlier` > 0.7 and the feature has no `Depends on:` line → leave the spec as is and add a finding `{"title": "jev: feature <n> may depend on an earlier feature", "body": "<title>; depends_on_earlier=<value>, no Depends on line", "kind": "debt", "source": "build"}` to the returned `findings`.
+
 ## Deliver
 `/usr/bin/git checkout -b spec/<slug>`, `/usr/bin/git add docs/specs/<file>` (explicit path, never `-A`), commit `spec: <slug>`, `/usr/bin/git push -u origin spec/<slug>`, `gh pr create --title "spec: <slug>" --body "<overview paragraph>"`.
 Never push to the main branch, never `gh pr merge`, no `Co-Authored-By`, never create issues or labels.
