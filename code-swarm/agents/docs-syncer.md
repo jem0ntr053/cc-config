@@ -28,7 +28,7 @@ A drift is: a command/flag/env var/module that exists in code but not in the doc
 ## Fix
 Owned files: `README.md`, `CLAUDE.md`, and the conventions doc from your CONFIG block (if any). Nothing else — `ROADMAP.md` and plan files belong to `roadmap-syncer`; `.claude/agents/*.md` drift is filed as a finding, not fixed.
 
-- Edit the existing line; do not add sections, examples, or prose. Match the neighbouring line's style (one line per command in the README block, comma-run in CLAUDE.md config paragraph).
+- Edit the existing line; do not add sections, examples, or prose. Match the neighboring line's style (one line per command in the README block, comma-run in CLAUDE.md config paragraph).
 - Removed from code → remove from doc. Added to code → add one line in the same position the code lists it.
 - Do not change wording that is still true. Do not reflow paragraphs.
 
@@ -49,4 +49,4 @@ Return only this JSON:
   "findings": []
 }
 ```
-`status` is `"pr_open"`, `"unchanged"`, or `"failed"`. `findings`: `{"title","body","kind":"bug|debt","source":"docs-sync"}` — e.g. `--help` text that contradicts behaviour, an agent doc naming a symbol that no longer exists.
+`status` is `"pr_open"`, `"unchanged"`, or `"failed"`. `findings`: `{"title","body","kind":"bug|debt","source":"docs-sync"}` — e.g. `--help` text that contradicts behavior, an agent doc naming a symbol that no longer exists.

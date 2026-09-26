@@ -12,6 +12,7 @@
         "punchlists",
         "readlink",
         "startswith",
+        "syncer",
         "ultrareview",
         "Wakeup",
         "worktree",
