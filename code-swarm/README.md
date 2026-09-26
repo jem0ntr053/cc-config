@@ -37,3 +37,4 @@ env or `~/.config/typesafe/.env`. One-line SDK setup:
 (Homebrew python refuses `pip --user`; jev.py finds the venv's site-packages itself).
 
 `.swarm.json` `jev.mode` (`shadow` default, `enforce`, `off`) drives gate 2 in `/swarm` pre-flight: shadow adds a `jev` column to the queue table; enforce relabels/drops issues per the spec rules and routes `tier: opus` issues to an opus implementer; off skips the CLI.
+The same mode also drives gates 1, 3, and 4 inside pr-verifier (battery `verifier_leniency`), issue-filer (`finding_dedup`), and product-planner (`feature_sizing`): shadow logs only, enforce applies the spec Addition 3 rules (force `changes_requested` on observed divergence; skip/`possible-dup: #N` findings; split oversized features), off skips the CLI.

@@ -132,6 +132,21 @@ const config = { root: "/r/dayos", test_cmd: ".venv/bin/python -m pytest -q", ma
   assert.match(offJev[0].prompt, /Jev gates off\./)
 }
 
+// agents carry exactly one Jev gate section naming battery + spec thresholds
+{
+  const checks = {
+    "pr-verifier": [/verifier_leniency/, /0\.7/],
+    "issue-filer": [/finding_dedup/, /0\.8/, /0\.2/, /possible-dup: #/],
+    "product-planner": [/feature_sizing/, /0\.4/, /0\.7/],
+  }
+  for (const [name, patterns] of Object.entries(checks)) {
+    const md = readFileSync(new URL(`../agents/${name}.md`, import.meta.url), "utf8")
+    assert.equal((md.match(/^## Jev gate/gm) ?? []).length, 1, `${name}: exactly one Jev gate section`)
+    assert.match(md, /Jev gates off\./, `${name}: mentions Jev gates off`)
+    for (const p of patterns) assert.match(md, p, `${name}: matches ${p}`)
+  }
+}
+
 // issues accept {n, tier}; implementer model from tier
 {
   const { calls } = await run({ issues: [{ n: 5, tier: "opus" }, 6], config }, (type, prompt) => {
