@@ -151,8 +151,24 @@ const config = { root: "/r/dayos", test_cmd: ".venv/bin/python -m pytest -q", ma
 // issue-filer renders findings into the four issue-ready sections
 {
   const md = readFileSync(new URL("../agents/issue-filer.md", import.meta.url), "utf8")
-  for (const p of [/### Files/, /### Change/, /### Test/, /### Acceptance/, /needs-human/, /needs human input/]) {
+  for (const p of [/### Files/, /### Change/, /### Test/, /### Acceptance/, /--state all/, /not_filed/, /wording-only/]) {
     assert.match(md, p)
+  }
+  assert.doesNotMatch(md, /needs human input/)
+}
+
+// findings carry issue-ready fields
+{
+  const src = readFileSync(new URL("../skills/swarm/swarm.js", import.meta.url), "utf8")
+  assert.match(src, /required: \["title", "body", "kind", "source", "files", "change", "test"\]/)
+  assert.match(src, /not_filed/)
+}
+
+// every finding producer asks for change
+{
+  for (const name of ["docs-syncer", "feature-architect", "issue-implementer", "issue-triager", "pr-verifier", "product-planner", "roadmap-syncer", "security-auditor", "test-gap-auditor"]) {
+    const md = readFileSync(new URL(`../agents/${name}.md`, import.meta.url), "utf8")
+    assert.match(md, /"change"/, name)
   }
 }
 

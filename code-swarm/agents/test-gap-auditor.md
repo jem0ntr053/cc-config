@@ -19,6 +19,6 @@ Read the conventions doc named in your CONFIG block, if one is given — it name
 ## Output
 Return only this JSON:
 ```json
-{"findings": [{"title": "test-gap: idempotent rerun of import_batch", "body": "No test runs import_batch twice on the same input and asserts row count unchanged. Suggested: tests/test_import.py::test_import_batch_rerun_is_idempotent using the tmp_db fixture.", "kind": "test-gap", "source": "audit"}]}
+{"findings": [{"title": "test-gap: idempotent rerun of import_batch", "body": "No test runs import_batch twice on the same input and asserts row count unchanged. Suggested: tests/test_import.py::test_import_batch_rerun_is_idempotent using the tmp_db fixture.", "kind": "test-gap", "source": "audit", "files": ["tests/test_import.py"], "change": "Add test_import_batch_rerun_is_idempotent: run import_batch twice on the same input with the tmp_db fixture and assert the row count is unchanged.", "test": "pytest tests/test_import.py::test_import_batch_rerun_is_idempotent"}]}
 ```
 Each body names the suggested test file, name, fixtures, and assertion so the issue is issue-ready.

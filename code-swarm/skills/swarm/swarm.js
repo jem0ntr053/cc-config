@@ -38,8 +38,11 @@ const FINDING = {
     body: { type: "string" },
     kind: { type: "string", enum: ["bug", "feature", "debt", "security", "test-gap"] },
     source: { type: "string" },
+    files: { type: "array", items: { type: "string" }, description: "Repo paths the fix touches. Empty if you cannot name them." },
+    change: { type: "string", description: "The exact edit, including any new text. Empty if you cannot state it." },
+    test: { type: "string", description: "Command or grep that fails now and passes after the fix." },
   },
-  required: ["title", "body", "kind", "source"],
+  required: ["title", "body", "kind", "source", "files", "change", "test"],
 }
 const FINDINGS = { type: "array", items: FINDING }
 
@@ -136,8 +139,9 @@ const FILER_SCHEMA = {
   properties: {
     created: { type: "array", items: { type: "object", properties: { number: { type: "integer" }, title: { type: "string" } } } },
     skipped_duplicate: { type: "array", items: { type: "object", properties: { title: { type: "string" }, dup_of: { type: "string" } } } },
+    not_filed: { type: "array", items: { type: "object", properties: { title: { type: "string" }, reason: { type: "string" } } } },
   },
-  required: ["created", "skipped_duplicate"],
+  required: ["created", "skipped_duplicate", "not_filed"],
 }
 
 const PLAN_SCHEMA = {
@@ -318,11 +322,11 @@ if (audit) {
 // ── File findings ─────────────────────────────────────────────────────────────
 
 phase("File")
-let filed = { created: [], skipped_duplicate: [] }
+let filed = { created: [], skipped_duplicate: [], not_filed: [] }
 if (findings.length > 0) {
   const f = await agent(`${CONV}\nToday is ${date}. File these findings per your instructions:\n${JSON.stringify(findings, null, 2)}`,
     { label: "file:findings", phase: "File", agentType: "code-swarm:issue-filer", schema: FILER_SCHEMA, effort: "low" })
-  filed = f ?? { created: [], skipped_duplicate: [], error: "filer returned null; findings listed below" }
+  filed = f ?? { created: [], skipped_duplicate: [], not_filed: [], error: "filer returned null; findings listed below" }
 }
 
 return audit

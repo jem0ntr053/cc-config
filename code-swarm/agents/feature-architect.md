@@ -30,7 +30,7 @@ Return only this JSON:
   "findings": []
 }
 ```
-`findings`: unrelated problems noticed — `{"title","body","kind":"bug|feature|debt","source":"#N"}`.
+`findings`: unrelated problems noticed — `{"title","body","kind":"bug|feature|debt","source":"#N","files":[…],"change":"…","test":"…"}`. Fill files, change, and test so the finding is issue-ready; leave them empty only if you cannot, and it will not be filed.
 
 ## Rules
 - Never edit files. Never open PRs. Never label `agent-ready` — a human does that.
