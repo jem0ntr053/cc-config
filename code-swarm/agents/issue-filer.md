@@ -32,7 +32,8 @@ Otherwise, per surviving finding F and per open issue O from step 1 (fan-out, on
 ```json
 {"finding": {"title": "...", "body": "..."}, "open": {"number": O.number, "title": "...", "body": "..."}}
 ```
-then run `python3 <CLI> finding_dedup <that file> --gate filer --mode <mode> --agent-did '{"action": "file|skip", "dup_of": <number or null>}'` (agent-did = what step 2 already decided for F).
+then run `JEV_REPO=<repo> python3 <CLI> finding_dedup <that file> --gate filer --mode <mode> --agent-did '{"action": "file|skip", "dup_of": <number or null>}'` (agent-did = what step 2 already decided for F).
+`<repo>` is the name in CONFIG's `JEV_REPO=<name>` Jev line.
 
 - Any `{"skipped": true}` → treat as off for F.
 - Mode `shadow` → nothing further.

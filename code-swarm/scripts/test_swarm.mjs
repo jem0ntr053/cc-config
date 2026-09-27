@@ -135,9 +135,9 @@ const config = { root: "/r/dayos", test_cmd: ".venv/bin/python -m pytest -q", ma
 // agents carry exactly one Jev gate section naming battery + spec thresholds
 {
   const checks = {
-    "pr-verifier": [/verifier_leniency/, /0\.7/],
-    "issue-filer": [/finding_dedup/, /0\.8/, /0\.2/, /possible-dup: #/],
-    "product-planner": [/feature_sizing/, /0\.4/, /0\.7/],
+    "pr-verifier": [/verifier_leniency/, /0\.7/, /JEV_REPO=<repo> python3 <CLI>/],
+    "issue-filer": [/finding_dedup/, /0\.8/, /0\.2/, /possible-dup: #/, /JEV_REPO=<repo> python3 <CLI>/],
+    "product-planner": [/feature_sizing/, /0\.4/, /0\.7/, /JEV_REPO=<repo> python3 <CLI>/],
   }
   for (const [name, patterns] of Object.entries(checks)) {
     const md = readFileSync(new URL(`../agents/${name}.md`, import.meta.url), "utf8")
