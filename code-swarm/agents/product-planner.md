@@ -32,8 +32,7 @@ Otherwise, per `## Feature <n>` section, Write `/tmp/swarm-jev-size-<slug>-<n>.j
 ```json
 {"n": n, "title": "...", "section": "<full markdown of that feature section>", "earlier_features": ["<title of feature 1>", "..."], "depends_on": [m]}
 ```
-then run `JEV_REPO=<repo> python3 <CLI> feature_sizing <that file> --gate planner --mode <mode> --agent-did '{"depends_on": [m]}'`.
-`<repo>` is the name in CONFIG's `JEV_REPO=<name>` Jev line.
+then run CONFIG's Jev command with battery `feature_sizing`, state `<that file>`, gate `planner`, agent-did `{"depends_on": [m]}`.
 
 - `{"skipped": true}` → treat as off for that feature.
 - Mode `shadow` → nothing further.
