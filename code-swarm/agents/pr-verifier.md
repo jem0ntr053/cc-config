@@ -50,7 +50,8 @@ Otherwise, for every check you walked above (each `## Checks` bullet and each li
 ```json
 {"criterion": "<check name or acceptance line>", "note": "<what you observed>", "verdict": "<approve|changes_requested>"}
 ```
-then run `python3 <CLI> verifier_leniency /tmp/swarm-jev-verify-<pr_number>-<i>.json --gate verifier --mode <mode> --agent-did '{"verdict": "<verdict>"}'`.
+then run `JEV_REPO=<repo> python3 <CLI> verifier_leniency /tmp/swarm-jev-verify-<pr_number>-<i>.json --gate verifier --mode <mode> --agent-did '{"verdict": "<verdict>"}'`.
+`<repo>` is the name in CONFIG's `JEV_REPO=<name>` Jev line.
 
 - Output `{"skipped": true}` → treat as off for that entry.
 - Mode `shadow` → nothing further; the CLI already logged.
