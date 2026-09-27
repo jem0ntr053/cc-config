@@ -49,4 +49,4 @@ Return only this JSON:
   "findings": []
 }
 ```
-`status` is `"pr_open"`, `"unchanged"`, or `"failed"`. `findings`: `{"title","body","kind":"bug|debt","source":"docs-sync"}` — e.g. `--help` text that contradicts behavior, an agent doc naming a symbol that no longer exists.
+`status` is `"pr_open"`, `"unchanged"`, or `"failed"`. `findings`: `{"title","body","kind":"bug|debt","source":"docs-sync","files":[…],"change":"…","test":"…"}` — e.g. `--help` text that contradicts behavior, an agent doc naming a symbol that no longer exists. Fill files, change, and test so the finding is issue-ready; leave them empty only if you cannot, and it will not be filed.

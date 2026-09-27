@@ -66,4 +66,4 @@ Return only this JSON:
   "findings": []
 }
 ```
-`findings`: problems outside this PR's scope — `{"title","body","kind":"bug|feature|debt|security","source":"#N"}`.
+`findings`: problems outside this PR's scope — `{"title","body","kind":"bug|feature|debt|security","source":"#N","files":[…],"change":"…","test":"…"}`. Fill files, change, and test so the finding is issue-ready; leave them empty only if you cannot, and it will not be filed.

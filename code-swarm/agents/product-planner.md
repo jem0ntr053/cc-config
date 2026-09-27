@@ -38,7 +38,7 @@ then run CONFIG's Jev command with battery `feature_sizing`, state `<that file>`
 - Mode `shadow` → nothing further.
 - Mode `enforce`:
   - `single_pr_unit` < 0.4 → split that feature into two features once (rewrite the section, renumber later features and their `<a id>` anchors and `Depends on:` lines; do not re-run the gate on the halves).
-  - `depends_on_earlier` > 0.7 and the feature has no `Depends on:` line → leave the spec as is and add a finding `{"title": "jev: feature <n> may depend on an earlier feature", "body": "<title>; depends_on_earlier=<value>, no Depends on line", "kind": "debt", "source": "build"}` to the returned `findings`.
+  - `depends_on_earlier` > 0.7 and the feature has no `Depends on:` line → leave the spec as is and add a finding `{"title": "jev: feature <n> may depend on an earlier feature", "body": "<title>; depends_on_earlier=<value>, no Depends on line", "kind": "debt", "source": "build", "files": ["<spec_path>"], "change": "Add a Depends on: line to feature <n> naming the earlier feature it builds on.", "test": "grep -n 'Depends on:' <spec_path>"}` to the returned `findings`.
 
 ## Deliver
 `/usr/bin/git checkout -b spec/<slug>`, `/usr/bin/git add docs/specs/<file>` (explicit path, never `-A`), commit `spec: <slug>`, `/usr/bin/git push -u origin spec/<slug>`, `gh pr create --title "spec: <slug>" --body "<overview paragraph>"`.
@@ -54,4 +54,4 @@ Return only this JSON:
   "findings": []
 }
 ```
-`findings`: problems in the existing repo you noticed while reading — `{"title","body","kind":"bug|feature|debt","source":"build"}`.
+`findings`: problems in the existing repo you noticed while reading — `{"title","body","kind":"bug|feature|debt","source":"build","files":[…],"change":"…","test":"…"}`. Fill files, change, and test so the finding is issue-ready; leave them empty only if you cannot, and it will not be filed.

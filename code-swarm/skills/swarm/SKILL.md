@@ -102,7 +102,7 @@ When the workflow returns, print:
 | #17 | pr_open | https://… | 344/0 | approved r1 |
 | #18 | needs_human | https://… | 343/1 | verify r2: reasons… |
 
-Then `designs: N posted (label design-review)` and `findings: N filed, M duplicates` listing created issue numbers. If `filed.error` is set, print the raw findings so nothing is lost.
+Then `designs: N posted (label design-review)` and `findings: N filed, M duplicates, K not filed` listing created issue numbers, then each `not_filed` entry as `- <title> (<reason>)`. If `filed.error` is set, print the raw findings so nothing is lost.
 
 For `--dry-run`: print each brief (issue, branch, files, tests) and the rejected list. Confirm `git status --porcelain` is unchanged.
 

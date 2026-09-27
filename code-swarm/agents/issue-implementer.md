@@ -63,4 +63,4 @@ Return only this JSON:
   "findings": []
 }
 ```
-`status` is `"pr_open"` or `"failed"`. `findings`: adjacent problems you noticed but did not touch — `{"title","body","kind":"bug|feature|debt","source":"#N"}`.
+`status` is `"pr_open"` or `"failed"`. `findings`: adjacent problems you noticed but did not touch — `{"title","body","kind":"bug|feature|debt","source":"#N","files":[…],"change":"…","test":"…"}`. Fill files, change, and test so the finding is issue-ready; leave them empty only if you cannot, and it will not be filed.

@@ -48,4 +48,4 @@ Return only this JSON:
   "findings": []
 }
 ```
-`status` is `"pr_open"`, `"unchanged"`, or `"failed"`. `findings`: `{"title","body","kind":"bug|feature|debt","source":"roadmap-sync"}` — e.g. a shipped feature with no spec, a bullet that no longer matches the code.
+`status` is `"pr_open"`, `"unchanged"`, or `"failed"`. `findings`: `{"title","body","kind":"bug|feature|debt","source":"roadmap-sync","files":[…],"change":"…","test":"…"}` — e.g. a shipped feature with no spec, a bullet that no longer matches the code. Fill files, change, and test so the finding is issue-ready; leave them empty only if you cannot, and it will not be filed.

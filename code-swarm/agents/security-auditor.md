@@ -28,6 +28,6 @@ Weak crypto (SHA-256 fingerprint is dedup, not security), SSL/TLS, memory overfl
 ## Output
 Return only this JSON:
 ```json
-{"findings": [{"title": "zip-slip: extract_archive does not reject ../ entries", "body": "src/app/io.py extract_archive uses ZipFile.extractall without path check. Repro: zip with entry '../../x'. Fix: resolve each member path and assert it is under target.", "kind": "security", "source": "audit"}]}
+{"findings": [{"title": "zip-slip: extract_archive does not reject ../ entries", "body": "src/app/io.py extract_archive uses ZipFile.extractall without path check. Repro: zip with entry '../../x'. Fix: resolve each member path and assert it is under target.", "kind": "security", "source": "audit", "files": ["src/app/io.py"], "change": "In extract_archive, resolve each member path and raise if it is not under the target dir before extracting.", "test": "pytest -k extract_archive"}]}
 ```
 `kind` is `security` for checklist/scan hits, `debt` for licensing. Empty list is a valid result.

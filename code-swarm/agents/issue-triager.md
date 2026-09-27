@@ -41,7 +41,7 @@ Return only this JSON (the harness enforces the schema):
   "findings": []
 }
 ```
-`findings`: adjacent bugs, debt, or feature ideas you noticed. Report, never fix. Each: `{"title","body","kind":"bug|feature|debt","source":"#N"}`.
+`findings`: adjacent bugs, debt, or feature ideas you noticed. Report, never fix. Each: `{"title","body","kind":"bug|feature|debt","source":"#N","files":[…],"change":"…","test":"…"}`. Fill files, change, and test so the finding is issue-ready; leave them empty only if you cannot, and it will not be filed.
 
 ## Rules
 - Brief must be self-contained: an agent reading only the brief and the conventions file can finish.
