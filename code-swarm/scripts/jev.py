@@ -99,7 +99,7 @@ def log_line(gate, mode, state, answers, agent_did):
         os.makedirs(os.path.dirname(path), exist_ok=True)
         entry = {
             'ts': datetime.now(timezone.utc).isoformat(),
-            'repo': repo_name(),
+            'repo': os.environ.get('JEV_REPO') or repo_name(),
             'gate': gate,
             'mode': mode,
             'state_hash': hashlib.sha256(

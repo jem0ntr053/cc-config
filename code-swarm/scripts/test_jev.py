@@ -4,6 +4,7 @@ import contextlib
 import io
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -14,7 +15,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import jev
 
 
-def run(argv, key=None):
+def run(argv, key=None, repo=None):
     tmpdir = tempfile.mkdtemp()
     state_path = os.path.join(tmpdir, 'state.json')
     with open(state_path, 'w') as f:
@@ -24,8 +25,11 @@ def run(argv, key=None):
 
     env = dict(os.environ)
     env.pop('TYPESAFE_API_KEY', None)
+    env.pop('JEV_REPO', None)
     if key is not None:
         env['TYPESAFE_API_KEY'] = key
+    if repo is not None:
+        env['JEV_REPO'] = repo
     env['JEV_LOG'] = log_path
 
     full_argv = [argv[0], state_path] + argv[1:]
@@ -168,6 +172,17 @@ class TestJev(unittest.TestCase):
             self.assertEqual(log_lines[0]['repo'], os.path.basename(plain))
         finally:
             os.chdir(cwd)
+
+    def test_log_repo_from_env_in_non_git_cwd(self):
+        plain = tempfile.mkdtemp()
+        cwd = os.getcwd()
+        try:
+            os.chdir(plain)
+            _, _, log_lines = run(['issue_pretriage'], repo='myrepo')
+            self.assertEqual(log_lines[0]['repo'], 'myrepo')
+        finally:
+            os.chdir(cwd)
+            shutil.rmtree(plain, ignore_errors=True)
 
 
 if __name__ == '__main__':
