@@ -4,6 +4,7 @@ import contextlib
 import io
 import json
 import os
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -138,6 +139,35 @@ class TestJev(unittest.TestCase):
         self.assertEqual(entry['gate'], 'issue_pretriage')
         self.assertEqual(entry['mode'], 'shadow')
         self.assertTrue(entry['answers']['skipped'])
+
+    def test_log_repo_is_repo_not_worktree(self):
+        base = tempfile.mkdtemp()
+        repo = os.path.join(base, 'myrepo')
+        os.makedirs(repo)
+        subprocess.run(['git', 'init', '-q'], cwd=repo, check=True, capture_output=True)
+        subprocess.run(
+            ['git', '-c', 'user.name=t', '-c', 'user.email=t@t',
+             'commit', '-q', '--allow-empty', '-m', 'init'],
+            cwd=repo, check=True, capture_output=True,
+        )
+        wt = os.path.join(base, 'wt_other')
+        subprocess.run(['git', 'worktree', 'add', '-q', wt, 'HEAD'], cwd=repo, check=True, capture_output=True)
+
+        cwd = os.getcwd()
+        try:
+            os.chdir(wt)
+            _, _, log_lines = run(['issue_pretriage'])
+            self.assertEqual(log_lines[0]['repo'], 'myrepo')
+        finally:
+            os.chdir(cwd)
+
+        plain = tempfile.mkdtemp()
+        try:
+            os.chdir(plain)
+            _, _, log_lines = run(['issue_pretriage'])
+            self.assertEqual(log_lines[0]['repo'], os.path.basename(plain))
+        finally:
+            os.chdir(cwd)
 
 
 if __name__ == '__main__':
