@@ -121,7 +121,7 @@ const config = { root: "/r/dayos", test_cmd: ".venv/bin/python -m pytest -q", ma
 {
   const { calls } = await run({ issues: [9], dryRun: true, config: { ...config, jev: { mode: "shadow", cli: "/p/jev.py" } } })
   assert.ok(calls.length > 0)
-  for (const c of calls) assert.match(c.prompt, /Jev gates: mode shadow; CLI \/p\/jev\.py\./)
+  for (const c of calls) assert.match(c.prompt, /Jev gates: mode shadow; CLI \/p\/jev\.py; run it as JEV_REPO=dayos python3 \/p\/jev\.py /)
 }
 
 // no jev block or mode off -> "Jev gates off."

@@ -25,6 +25,7 @@ const SCA_CMD = config.sca_cmd ?? ""               // e.g. "bandit -q -r ."
 const LANGS = config.langs ?? ["python"]
 const APP = config.app ?? null                     // { start_cmd, url, ready_wait_s } → pr-verifier's live-app lens
 const JEV = config.jev ?? null
+const REPO_NAME = REPO.replace(/\/+$/, "").split("/").pop()
 const QUEUE = issues.map(i => typeof i === "number" ? { n: i, tier: "sonnet" } : { n: i.n, tier: i.tier ?? "sonnet" })
 const TIER = Object.fromEntries(QUEUE.map(i => [i.n, i.tier]))
 
@@ -183,7 +184,7 @@ const CONV = [
   `Languages: ${LANGS.join(", ")}.`,
   CONV_DOC ? `Read ${CONV_DOC} before anything else.` : `No repo conventions doc; follow standard git flow.`,
   APP ? `App: start with "${APP.start_cmd}", url ${APP.url}, wait ${APP.ready_wait_s ?? 10}s before testing.` : "No app block; skip the live-app lens.",
-  JEV && JEV.mode !== "off" ? `Jev gates: mode ${JEV.mode}; CLI ${JEV.cli}.` : "Jev gates off.",
+  JEV && JEV.mode !== "off" ? `Jev gates: mode ${JEV.mode}; CLI ${JEV.cli}; run it as JEV_REPO=${REPO_NAME} python3 ${JEV.cli} <battery> <state.json> --gate <name> --mode ${JEV.mode} [--agent-did '<json>'].` : "Jev gates off.",
 ].join("\n")
 const findings = []
 const collect = r => { if (r && Array.isArray(r.findings)) findings.push(...r.findings) }
