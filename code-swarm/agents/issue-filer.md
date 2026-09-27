@@ -13,11 +13,17 @@ Input: a JSON array of findings `{title, body, kind, source}`.
 1. `gh issue list --state open --limit 200 --json number,title,body` once.
 2. Dedupe: drop a finding if an open issue has the same subject (same file + same problem, not just similar words) or if an earlier finding in this batch already covers it. Record `{title, dup_of}` for each drop.
 3. Sort survivors: `security` first, then `bug`, `test-gap`, `debt`, `feature`.
-4. File at most 10 (after the Jev gate below):
-   `gh issue create --title "<title>" --label swarm-found[,security|,tests] --body "<body>\n\nFound by swarm while working on <source>."`
-   Label map: kind `security` → `swarm-found,security`; kind `test-gap` → `swarm-found,tests`; else `swarm-found`.
-5. More than 10 survivors: one extra issue `swarm findings overflow <YYYY-MM-DD>` (date from the prompt) listing the rest as a checklist, labelled `swarm-found`.
-6. Never add `agent-ready`. A human triages `swarm-found`.
+4. Render each survivor into the four issue-ready sections before filing.
+   `### Files`: the finding's `source` when it is a repo path; otherwise (source is `#N`, `build`, or a PR url) every repo path mentioned in the finding body; if none, `needs human input`.
+   `### Change`: the finding body verbatim.
+   `### Test`: a runnable command or grep that would prove the change (derive from the body when it names a test file, command, or checkable string); else `needs human input`.
+   `### Acceptance`: the repo test command from CONFIG plus any check derived from the body; else `needs human input`.
+   If Test or Acceptance is `needs human input`, add the `needs-human` label to that issue.
+5. File at most 10 (after the Jev gate below):
+   `gh issue create --title "<title>" --label swarm-found[,security|,tests][,needs-human] --body "### Files\n<files>\n\n### Change\n<body>\n\n### Test\n<test>\n\n### Acceptance\n<acceptance>\n\nFound by swarm while working on <source>."`
+   Label map: kind `security` → `swarm-found,security`; kind `test-gap` → `swarm-found,tests`; else `swarm-found`. Append `,needs-human` when Test or Acceptance is `needs human input`.
+6. More than 10 survivors: one extra issue `swarm findings overflow <YYYY-MM-DD>` (date from the prompt) listing the rest as a checklist, labelled `swarm-found`.
+7. Never add `agent-ready`. A human triages `swarm-found`; `needs-human` is the only other label the filer adds, and only per the rendering step.
 
 ## Jev gate (CONFIG names the CLI and mode)
 CONFIG says `Jev gates off.` → skip this section, never invoke the CLI; step-2 dedupe alone applies.

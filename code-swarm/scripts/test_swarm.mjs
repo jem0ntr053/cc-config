@@ -147,6 +147,14 @@ const config = { root: "/r/dayos", test_cmd: ".venv/bin/python -m pytest -q", ma
   }
 }
 
+// issue-filer renders findings into the four issue-ready sections
+{
+  const md = readFileSync(new URL("../agents/issue-filer.md", import.meta.url), "utf8")
+  for (const p of [/### Files/, /### Change/, /### Test/, /### Acceptance/, /needs-human/, /needs human input/]) {
+    assert.match(md, p)
+  }
+}
+
 // issues accept {n, tier}; implementer model from tier
 {
   const { calls } = await run({ issues: [{ n: 5, tier: "opus" }, 6], config }, (type, prompt) => {
