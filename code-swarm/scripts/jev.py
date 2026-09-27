@@ -11,6 +11,7 @@ import importlib
 import json
 import os
 import re
+import subprocess
 import sys
 from datetime import datetime, timezone
 
@@ -79,13 +80,26 @@ def load_battery(name):
         return json.load(f)['questions']
 
 
+def repo_name():
+    # --git-common-dir returns `<repo>/.git` from both the main checkout and
+    # any worktree, so the parent's basename is the repo name in both cases.
+    try:
+        result = subprocess.run(
+            ['git', 'rev-parse', '--path-format=absolute', '--git-common-dir'],
+            capture_output=True, text=True, check=True,
+        )
+        return os.path.basename(os.path.dirname(result.stdout.strip()))
+    except Exception:
+        return os.path.basename(os.getcwd())
+
+
 def log_line(gate, mode, state, answers, agent_did):
     path = os.environ.get('JEV_LOG') or LOG_DEFAULT
     try:
         os.makedirs(os.path.dirname(path), exist_ok=True)
         entry = {
             'ts': datetime.now(timezone.utc).isoformat(),
-            'repo': os.path.basename(os.getcwd()),
+            'repo': repo_name(),
             'gate': gate,
             'mode': mode,
             'state_hash': hashlib.sha256(
