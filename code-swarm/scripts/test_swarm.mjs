@@ -135,15 +135,16 @@ const config = { root: "/r/dayos", test_cmd: ".venv/bin/python -m pytest -q", ma
 // agents carry exactly one Jev gate section naming battery + spec thresholds
 {
   const checks = {
-    "pr-verifier": [/verifier_leniency/, /0\.7/, /JEV_REPO=<repo> python3 <CLI>/],
-    "issue-filer": [/finding_dedup/, /0\.8/, /0\.2/, /possible-dup: #/, /JEV_REPO=<repo> python3 <CLI>/],
-    "product-planner": [/feature_sizing/, /0\.4/, /0\.7/, /JEV_REPO=<repo> python3 <CLI>/],
+    "pr-verifier": [/verifier_leniency/, /0\.7/, /CONFIG's Jev command/],
+    "issue-filer": [/finding_dedup/, /0\.8/, /0\.2/, /possible-dup: #/, /CONFIG's Jev command/],
+    "product-planner": [/feature_sizing/, /0\.4/, /0\.7/, /CONFIG's Jev command/],
   }
   for (const [name, patterns] of Object.entries(checks)) {
     const md = readFileSync(new URL(`../agents/${name}.md`, import.meta.url), "utf8")
     assert.equal((md.match(/^## Jev gate/gm) ?? []).length, 1, `${name}: exactly one Jev gate section`)
     assert.match(md, /Jev gates off\./, `${name}: mentions Jev gates off`)
     for (const p of patterns) assert.match(md, p, `${name}: matches ${p}`)
+    assert.doesNotMatch(md, /python3 <CLI>/, `${name}: no hand-spelled Jev command`)
   }
 }
 
