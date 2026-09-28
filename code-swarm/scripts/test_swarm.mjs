@@ -137,7 +137,7 @@ const config = { root: "/r/dayos", test_cmd: ".venv/bin/python -m pytest -q", ma
 {
   const checks = {
     "pr-verifier": [/verifier_leniency/, /0\.7/, /CONFIG's Jev command/, /swarm-jev-verify-<pr_number>\.json/, /"checks": \[/],
-    "issue-filer": [/finding_dedup/, /0\.8/, /0\.2/, /possible-dup: #/, /CONFIG's Jev command/],
+    "issue-filer": [/finding_dedup/, /0\.8/, /0\.2/, /possible-dup: #/, /CONFIG's Jev command/, /names one of F's `files`/, /at most 5 per F/],
     "product-planner": [/feature_sizing/, /0\.4/, /0\.7/, /CONFIG's Jev command/],
   }
   for (const [name, patterns] of Object.entries(checks)) {
@@ -147,6 +147,12 @@ const config = { root: "/r/dayos", test_cmd: ".venv/bin/python -m pytest -q", ma
     for (const p of patterns) assert.match(md, p, `${name}: matches ${p}`)
     assert.doesNotMatch(md, /python3 <CLI>/, `${name}: no hand-spelled Jev command`)
   }
+}
+
+// filer Jev gate is not a full fan-out
+{
+  const md = readFileSync(new URL("../agents/issue-filer.md", import.meta.url), "utf8")
+  assert.doesNotMatch(md, /one call per pair/)
 }
 
 // verifier Jev gate is one call per verify

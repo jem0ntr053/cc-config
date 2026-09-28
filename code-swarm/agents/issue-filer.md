@@ -28,7 +28,7 @@ Input: a JSON array of findings `{title, body, kind, source, files, change, test
 ## Jev gate (CONFIG names the CLI and mode)
 CONFIG says `Jev gates off.` → skip this section, never invoke the CLI; step-2 dedupe alone applies.
 
-Otherwise, per surviving finding F and per open issue O from step 1 (fan-out, one call per pair), Write `/tmp/swarm-jev-dedup-<f>-<O.number>.json`:
+Otherwise, per surviving finding F, pick candidate issues O from step 1 whose title or body names one of F's `files` (at most 5 per F, highest issue number first). No candidates → no Jev call for F; treat it as max < 0.2. Per candidate pair, Write `/tmp/swarm-jev-dedup-<f>-<O.number>.json`:
 ```json
 {"finding": {"title": "...", "body": "..."}, "open": {"number": O.number, "title": "...", "body": "..."}}
 ```
@@ -36,7 +36,7 @@ then run CONFIG's Jev command with battery `finding_dedup`, state `<that file>`,
 
 - Any `{"skipped": true}` → treat as off for F.
 - Mode `shadow` → nothing further.
-- Mode `enforce` → take the max `same_problem` across O and its issue #N: max > 0.8 → do not create; record F in `skipped_duplicate` with `dup_of: "#N"`; 0.2 <= max <= 0.8 → create the issue with an extra body line `possible-dup: #N` appended after the `Found by swarm ...` line; max < 0.2 → create as usual.
+- Mode `enforce` → take the max `same_problem` across F's candidates and its issue #N: max > 0.8 → do not create; record F in `skipped_duplicate` with `dup_of: "#N"`; 0.2 <= max <= 0.8 → create the issue with an extra body line `possible-dup: #N` appended after the `Found by swarm ...` line; max < 0.2 → create as usual.
 
 ## Output
 Return only this JSON:
