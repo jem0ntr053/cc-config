@@ -46,15 +46,15 @@ Trigger: diff touches any file the brief marks as UI/API, or any file under the 
 ## Jev gate (CONFIG names the CLI and mode)
 CONFIG says `Jev gates off.` → skip this section entirely, never invoke the CLI.
 
-Otherwise, for every check you walked above (each `## Checks` bullet and each live-app criterion, including ones that passed — an `approve` has an empty `reasons`, so entries only for failures would make the approve rule a no-op), Write `/tmp/swarm-jev-verify-<pr_number>-<i>.json`:
+Otherwise, Write one file `/tmp/swarm-jev-verify-<pr_number>.json` holding every check you walked above (each `## Checks` bullet and each live-app criterion, including ones that passed — an `approve` has an empty `reasons`, so entries only for failures would make the approve rule a no-op):
 ```json
-{"criterion": "<check name or acceptance line>", "note": "<what you observed>", "verdict": "<approve|changes_requested>"}
+{"verdict": "<overall verdict>", "checks": [{"criterion": "<check name or acceptance line>", "note": "<what you observed>", "verdict": "<approve|changes_requested>"}]}
 ```
-then run CONFIG's Jev command with battery `verifier_leniency`, state `/tmp/swarm-jev-verify-<pr_number>-<i>.json`, gate `verifier`, agent-did `{"verdict": "<verdict>"}`.
+then run CONFIG's Jev command with battery `verifier_leniency`, state `/tmp/swarm-jev-verify-<pr_number>.json`, gate `verifier`, agent-did `{"verdict": "<overall verdict>"}`. One call per verify round.
 
-- Output `{"skipped": true}` → treat as off for that entry.
+- Output `{"skipped": true}` → treat as off.
 - Mode `shadow` → nothing further; the CLI already logged.
-- Mode `enforce` → if the overall verdict is `approve` and any entry's `divergence_observed` > 0.7, set the verdict to `changes_requested` and add one reason `jev: verifier observed divergence on <criterion>` per such entry, then post per `## Verdict`.
+- Mode `enforce` → if the overall verdict is `approve` and `divergence_observed` > 0.7, set the verdict to `changes_requested` and add one reason `jev: verifier observed divergence; recheck the checks list`, then post per `## Verdict`.
 
 ## Output
 Return only this JSON:

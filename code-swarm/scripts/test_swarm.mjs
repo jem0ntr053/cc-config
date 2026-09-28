@@ -136,7 +136,7 @@ const config = { root: "/r/dayos", test_cmd: ".venv/bin/python -m pytest -q", ma
 // agents carry exactly one Jev gate section naming battery + spec thresholds
 {
   const checks = {
-    "pr-verifier": [/verifier_leniency/, /0\.7/, /CONFIG's Jev command/],
+    "pr-verifier": [/verifier_leniency/, /0\.7/, /CONFIG's Jev command/, /swarm-jev-verify-<pr_number>\.json/, /"checks": \[/],
     "issue-filer": [/finding_dedup/, /0\.8/, /0\.2/, /possible-dup: #/, /CONFIG's Jev command/],
     "product-planner": [/feature_sizing/, /0\.4/, /0\.7/, /CONFIG's Jev command/],
   }
@@ -147,6 +147,14 @@ const config = { root: "/r/dayos", test_cmd: ".venv/bin/python -m pytest -q", ma
     for (const p of patterns) assert.match(md, p, `${name}: matches ${p}`)
     assert.doesNotMatch(md, /python3 <CLI>/, `${name}: no hand-spelled Jev command`)
   }
+}
+
+// verifier Jev gate is one call per verify
+{
+  const md = readFileSync(new URL("../agents/pr-verifier.md", import.meta.url), "utf8")
+  assert.doesNotMatch(md, /<pr_number>-<i>/)
+  const q = JSON.parse(readFileSync(new URL("../scripts/batteries/verifier_leniency.json", import.meta.url), "utf8"))
+  assert.match(q.questions.divergence_observed.instructions, /`checks`/)
 }
 
 // issue-filer renders findings into the four issue-ready sections
