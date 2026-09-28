@@ -24,8 +24,9 @@ async function run(args, respond = () => undefined) {
     calls.push({ prompt, ...opts })
     const type = opts.agentType.replace(/^code-swarm:/, "")
     const r = respond(type, prompt)
-    if (r !== undefined) return r
-    return CANNED[type] ?? { findings: [], created: [], skipped_duplicate: [] }
+    const reply = r !== undefined ? r : (CANNED[type] ?? { findings: [], created: [], skipped_duplicate: [], not_filed: [] })
+    if (reply != null) for (const k of opts.schema?.required ?? []) if (!(k in reply)) throw new Error(`${type} reply missing required key: ${k}`)
+    return reply
   }
   const result = await script(args, agent, fns => Promise.all(fns.map(f => f())),
     (items, fn) => Promise.all(items.map(fn)), () => {}, () => {})
@@ -73,7 +74,7 @@ const config = { root: "/r/dayos", test_cmd: ".venv/bin/python -m pytest -q", ma
     if (type === "product-planner") return plan
     if (type === "issue-groomer") {
       const n = Number(prompt.match(/feature: (\d+)/)[1])
-      return issueFor[n] ? { created: [{ number: issueFor[n], title: `f${n}` }], skipped_duplicate: [] } : null
+      return issueFor[n] ? { created: [{ number: issueFor[n], title: `f${n}` }], skipped_duplicate: [], not_filed: [] } : null
     }
   })
   assert.deepEqual(calls.map(c => c.agentType),
@@ -187,6 +188,14 @@ const config = { root: "/r/dayos", test_cmd: ".venv/bin/python -m pytest -q", ma
   assert.ok(calls.some(c => /Triage issue #6/.test(c.prompt)))
   assert.equal(calls.find(c => c.label === "impl:#5").model, "opus")
   assert.equal(calls.find(c => c.label === "impl:#6").model, "sonnet")
+}
+
+// stub rejects replies missing schema.required keys
+{
+  await assert.rejects(run({ issues: [9], config }, type => {
+    if (type === "issue-implementer") return { status: "pr_open", pr_url: "u", pr_number: 1, branch: "b", findings: [{ title: "t", body: "b", kind: "bug", source: "#9", files: ["a.py"], change: "c", test: "t" }] }
+    if (type === "issue-filer") return { created: [], skipped_duplicate: [] }
+  }), /not_filed/)
 }
 
 console.log("OK")
