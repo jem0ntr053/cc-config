@@ -90,7 +90,7 @@ def repo_name():
         )
         return os.path.basename(os.path.dirname(result.stdout.strip()))
     except Exception:
-        return os.path.basename(os.getcwd())
+        return 'unknown'
 
 
 def log_line(gate, mode, state, answers, agent_did):
