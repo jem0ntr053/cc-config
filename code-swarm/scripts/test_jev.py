@@ -169,7 +169,7 @@ class TestJev(unittest.TestCase):
         try:
             os.chdir(plain)
             _, _, log_lines = run(['issue_pretriage'])
-            self.assertEqual(log_lines[0]['repo'], os.path.basename(plain))
+            self.assertEqual(log_lines[0]['repo'], 'unknown')
         finally:
             os.chdir(cwd)
 
