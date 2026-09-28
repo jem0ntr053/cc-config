@@ -2,15 +2,15 @@
   "questions": {
     "divergence_observed": {
       "type": "noul",
-      "instructions": "Does the verifier note (`note`) describe behavior that differs from what the acceptance criterion (`criterion`) requires, regardless of the verdict given?",
+      "instructions": "`checks` lists acceptance criteria (`criterion`) with the verifier's notes (`note`). Does any note describe behavior that differs from what its criterion requires, regardless of the verdict given?",
       "criteria": {
-        "true": "The note records observed behavior that does not match the criterion.",
+        "true": "At least one note records observed behavior that does not match its criterion.",
         "false": "The note confirms the criterion or records nothing that contradicts it."
       }
     },
     "severity": {
       "type": "score",
-      "instructions": "How serious is the difference between observed behavior and the criterion?",
+      "instructions": "How serious is the worst difference between observed behavior and its criterion?",
       "criteria": [
         "cosmetic or wording difference; the criterion is effectively met",
         "a requirement partly unmet or unverified",
