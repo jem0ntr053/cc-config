@@ -161,6 +161,12 @@ class TestJev(unittest.TestCase):
         r = jev.decide_dedup([])
         self.assertEqual(r['action'], 'file')
 
+    def test_would_act_dedup_uses_decide_dedup(self):
+        self.assertTrue(jev.would_act('finding_dedup', {'same_problem': 0.2}, None))
+        self.assertFalse(jev.would_act('finding_dedup', {'same_problem': 0.19}, None))
+        with patch.object(jev, 'decide_dedup', return_value={'action': 'file', 'dup_of': None, 'possible_dup': None}):
+            self.assertFalse(jev.would_act('finding_dedup', {'same_problem': 0.5}, None))
+
     def test_decide_sizing(self):
         r = jev.decide_sizing({'single_pr_unit': 0.3})
         self.assertTrue(r['split'])

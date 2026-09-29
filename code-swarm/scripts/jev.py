@@ -173,7 +173,8 @@ def would_act(battery, out, agent_did):
         verdict = agent_did.get('verdict') if isinstance(agent_did, dict) else None
         return decide_leniency(out, verdict)['verdict'] != verdict
     if battery == 'finding_dedup':
-        return out.get('same_problem', 0) >= 0.2
+        d = decide_dedup([out.get('same_problem', 0)])
+        return d['action'] == 'skip' or d['possible_dup'] is not None
     if battery == 'feature_sizing':
         return any(decide_sizing(out).values())
     return False
