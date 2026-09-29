@@ -76,8 +76,8 @@ For each queued issue N: `gh issue view N --json title,body > /tmp/swarm-jev-N.j
 
 Interpretation:
 (a) `MODE=off` or `OUT` has `.skipped == true` → queue unchanged, `jev` column shows `—`.
-(b) shadow → queue table gains a column `jev` formatted `<kind.choice>/<complexity>/<risk>/<tier>` (tier computed with the >= 1.5 rule); nothing else changes; all issues launch as bare numbers or `{n, tier}` — either is accepted.
-(c) enforce → apply the gate 2 rules before launch: has_* missing or injection → `gh issue comment N --body "swarm gate 2: <reason>"` then `gh issue edit N --add-label needs-human --remove-label agent-ready`, drop N from the queue; design_question conf > 0.7 → `gh issue edit N --add-label feature --remove-label agent-ready`, drop N from the queue; remaining issues launch as `[{n: N, tier: "opus"|"sonnet"}]`. On `--dry-run` enforce must not write to GitHub: print what would have happened and keep the issue in the queue.
+(b) shadow → queue table gains a column `jev` formatted `<kind.choice>/<complexity>/<risk>/<decision.tier>`; nothing else changes; all issues launch as bare numbers or `{n, tier}` — either is accepted.
+(c) enforce → `.decision.needs_human` true → `gh issue comment N --body "swarm gate 2: <.decision.reason>"` then `gh issue edit N --add-label needs-human --remove-label agent-ready`, drop N from the queue; `.decision.label == "feature"` → `gh issue edit N --add-label feature --remove-label agent-ready`, drop N from the queue; remaining issues launch as `[{n: N, tier: <.decision.tier>}]`. On `--dry-run` enforce must not write to GitHub: print what would have happened and keep the issue in the queue.
 
 Gate 2 never blocks a run: a skipped or failed Jev call means every issue goes to the triager as today.
 

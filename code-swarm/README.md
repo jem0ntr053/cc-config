@@ -30,7 +30,7 @@ Load: `launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/com.montrose.swar
 
 ## Jev gates
 `scripts/jev.py <battery> <state.json> [--gate <name>] [--mode shadow|enforce|off] [--agent-did '<json>']`
-prints Jev's answers as JSON, fails open (`{"skipped": true, ...}`, exit 0) with no key or any error,
+prints Jev's answers as JSON (the issue_pretriage battery also adds a decision object: needs_human, reason, label, tier), fails open (`{"skipped": true, ...}`, exit 0) with no key or any error,
 and appends a line to `~/.cache/code-swarm/jev.jsonl` (`JEV_LOG` overrides the path; `JEV_REPO` overrides the logged repo name, which otherwise comes from git or `unknown` outside a checkout; /swarm sets it for every agent). Key: `TYPESAFE_API_KEY`
 env or `~/.config/typesafe/.env`. One-line SDK setup:
 `python3 -m venv ~/.cache/code-swarm/venv && ~/.cache/code-swarm/venv/bin/pip install typesafe-sdk`

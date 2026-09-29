@@ -55,6 +55,25 @@ class TestJev(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertEqual(out, {'skipped': True, 'reason': 'RuntimeError: boom'})
 
+    def test_pretriage_output_carries_decision(self):
+        answers = {'has_test': 0.2, 'complexity': 0.4, 'risk': 0.2}
+        with patch.object(jev, 'make_client', return_value=object()), \
+             patch.object(jev, 'ask', return_value=None), \
+             patch.object(jev, 'flatten', return_value=answers):
+            code, out, log_lines = run(['issue_pretriage'], key='x')
+        self.assertEqual(code, 0)
+        self.assertEqual(out['decision'], jev.decide_pretriage(answers))
+        self.assertIs(out['decision']['needs_human'], True)
+        self.assertNotIn('decision', log_lines[0]['answers'])
+
+    def test_other_battery_has_no_decision(self):
+        with patch.object(jev, 'make_client', return_value=object()), \
+             patch.object(jev, 'ask', return_value=None), \
+             patch.object(jev, 'flatten', return_value={'same_problem': 0.1}):
+            code, out, _ = run(['finding_dedup'], key='x')
+        self.assertEqual(code, 0)
+        self.assertNotIn('decision', out)
+
     def test_no_key_is_skipped(self):
         code, out, _ = run(['issue_pretriage'])
         self.assertEqual(code, 0)
