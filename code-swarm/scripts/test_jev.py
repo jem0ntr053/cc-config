@@ -66,6 +66,24 @@ class TestJev(unittest.TestCase):
         self.assertIs(out['decision']['needs_human'], True)
         self.assertNotIn('decision', log_lines[0]['answers'])
 
+    def test_flagged_row_logs_state(self):
+        answers = {'divergence_observed': 0.9, 'severity': 1.5}
+        with patch.object(jev, 'make_client', return_value=object()), \
+             patch.object(jev, 'ask', return_value=None), \
+             patch.object(jev, 'flatten', return_value=answers):
+            code, out, log_lines = run(['verifier_leniency', '--agent-did', '{"verdict": "approve"}'], key='x')
+        self.assertEqual(code, 0)
+        self.assertEqual(log_lines[0]['state'], {'title': 'x'})
+
+    def test_unflagged_row_omits_state(self):
+        answers = {'divergence_observed': 0.1, 'severity': 0.0}
+        with patch.object(jev, 'make_client', return_value=object()), \
+             patch.object(jev, 'ask', return_value=None), \
+             patch.object(jev, 'flatten', return_value=answers):
+            code, out, log_lines = run(['verifier_leniency', '--agent-did', '{"verdict": "approve"}'], key='x')
+        self.assertEqual(code, 0)
+        self.assertNotIn('state', log_lines[0])
+
     def test_other_battery_has_no_decision(self):
         with patch.object(jev, 'make_client', return_value=object()), \
              patch.object(jev, 'ask', return_value=None), \
