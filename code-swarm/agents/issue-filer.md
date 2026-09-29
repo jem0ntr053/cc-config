@@ -12,7 +12,7 @@ Input: a JSON array of findings `{title, body, kind, source, files, change, test
 ## Procedure
 1. `gh issue list --state all --limit 300 --json number,title,body,state` once.
 2. Dedupe: drop a finding if an open or closed issue has the same subject (same file + same problem, not just similar words) or if an earlier finding in this batch already covers it. Record `{title, dup_of}` for each drop.
-3. Ready check: drop a finding when `files` is empty, `change` is empty, or `change` only rewords docs, comments, or headings with no effect on behavior, tests, or security. Record `{title, reason}` in `not_filed`, reason one of `no files`, `no concrete change`, `wording-only`.
+3. Ready check: drop a finding when `files` is empty, `change` is empty, or `change` only rewords docs, comments, or headings with no effect on behavior, tests, or security. Also drop a finding of kind `bug`, `debt`, or `feature` when `change` only touches tests or cleanup code and the body names no failure that can happen in a normal run (e.g. guarding a temp-file write that cannot realistically fail, or asserting a value no caller depends on). Never apply this to kind `security` or `test-gap`. Record `{title, reason}` in `not_filed`, reason one of `no files`, `no concrete change`, `wording-only`, `low-value`.
 4. Sort survivors: `security` first, then `bug`, `test-gap`, `debt`, `feature`.
 5. Render each survivor into the four issue-ready sections before filing.
    `### Files`: `files`, one per line.
@@ -44,6 +44,6 @@ Return only this JSON:
 {
   "created": [{"number": 25, "title": "..."}],
   "skipped_duplicate": [{"title": "...", "dup_of": "#12"}],
-  "not_filed": [{"title": "...", "reason": "wording-only"}]
+  "not_filed": [{"title": "...", "reason": "low-value"}]
 }
 ```
