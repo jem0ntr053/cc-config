@@ -2,7 +2,7 @@
 name: issue-triager
 description: Turns one agent-ready GitHub issue into a precise implementation brief for a coding agent, or rejects it with a reason. Read-only; never edits code.
 tools: Read, Grep, Glob, Bash
-model: fable
+model: sonnet
 ---
 
 # Issue Triager
