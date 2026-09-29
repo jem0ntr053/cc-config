@@ -762,9 +762,16 @@ git commit -m "feat(code-swarm): Jev gates (shadow mode) + jev.py CLI"
 
 BUILT 2026-09-26 by the swarm itself on cc-config (issues #28/#29/#30 → PRs #31/#33/#39, all merged; plugin 0.3.0). Deviations: SDK in a venv at `~/.cache/code-swarm/venv` (Homebrew python refuses `pip --user`); gate 1 records every check the verifier runs, not only reasons (#40). Open: #41 (gate 3 call volume, decide before enforce), #42 (.gitignore). Gates run in shadow by default.
 
-- [ ] **Step 7: shadow review after 5 runs**
+- [x] **Step 7: shadow review after 5 runs**
 
 `python3 -c` one-liner over `~/.cache/code-swarm/jev.jsonl` grouping by gate: rows where Jev's enforce-rule would have differed from `agent_did`. Promote a gate to `enforce` in the pilot repo's `.swarm.json` only when those rows are ones the human agrees with. Record the decision per gate in this plan.
+
+REVIEWED 2026-09-29 over 522 entries (2026-09-26 → 09-29; cc-config, AutoCrate, dayos), rows matched to issues/PRs by timestamp and, for gate 2, by state hash (20 of 27). No gate promoted; all stay `shadow`.
+- Gate 1 (verifier, 81 checks): 6 approve→changes_requested flips on PRs #50, #53, #62 (×3), #69. All four PRs were correct and merged; 6/6 wrong.
+- Gate 2 (pretriage, 27): 7 needs-human. #30/#40/#42 were prose issues the swarm fixed anyway; #47 bounced wrongly (filled Acceptance scored 0.25). 1 opus pick (#65), which sonnet handled. Since #66 every issue arrives four-section, so little is left for this gate to catch.
+- Gate 3 (filer, 414 pairs): 4 would-skip dups, about 1 right (#68, closed as duplicate); #56 vs #52, #61 vs #58, AutoCrate #131 vs #129 were distinct. 47 possible-dup lines at 0.3–0.5 would be noise.
+- Gate 4 (planner): no data; `--build` never ran.
+Limits: the log stores only a state hash, so the review could not see what Jev read; most rows predate #71/#73 (batched verifier, candidate-only dedup). Next: #82 logs the state on rows where an enforce rule would act; review again after it lands.
 
 ---
 
