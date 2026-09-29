@@ -192,6 +192,8 @@ def main(argv=None):
                     out = {'skipped': True, 'reason': f'{type(e).__name__}: {e}'}
 
         log_line(gate, args.mode, state, out, agent_did)
+        if args.battery == 'issue_pretriage' and 'skipped' not in out:
+            out['decision'] = decide_pretriage(out)
         print(json.dumps(out))
         return 0
     except Exception as e:
