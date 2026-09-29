@@ -159,8 +159,16 @@ const config = { root: "/r/dayos", test_cmd: ".venv/bin/python -m pytest -q", ma
 {
   const md = readFileSync(new URL("../agents/pr-verifier.md", import.meta.url), "utf8")
   assert.doesNotMatch(md, /<pr_number>-<i>/)
+  assert.match(md, /Red check:/)
+  assert.match(md, /they do not cover the change/)
   const q = JSON.parse(readFileSync(new URL("../scripts/batteries/verifier_leniency.json", import.meta.url), "utf8"))
   assert.match(q.questions.divergence_observed.instructions, /`checks`/)
+}
+
+// triager runs on sonnet
+{
+  const md = readFileSync(new URL("../agents/issue-triager.md", import.meta.url), "utf8")
+  assert.match(md, /^model: sonnet$/m)
 }
 
 // issue-filer renders findings into the four issue-ready sections
