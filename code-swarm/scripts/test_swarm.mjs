@@ -166,7 +166,7 @@ const config = { root: "/r/dayos", test_cmd: ".venv/bin/python -m pytest -q", ma
 // issue-filer renders findings into the four issue-ready sections
 {
   const md = readFileSync(new URL("../agents/issue-filer.md", import.meta.url), "utf8")
-  for (const p of [/### Files/, /### Change/, /### Test/, /### Acceptance/, /--state all/, /not_filed/, /wording-only/]) {
+  for (const p of [/### Files/, /### Change/, /### Test/, /### Acceptance/, /--state all/, /not_filed/, /wording-only/, /low-value/, /Never apply this to kind `security` or `test-gap`/]) {
     assert.match(md, p)
   }
   assert.doesNotMatch(md, /needs human input/)
