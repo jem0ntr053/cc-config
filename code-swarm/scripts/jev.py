@@ -137,9 +137,9 @@ def decide_pretriage(answers):
     return {'needs_human': False, 'reason': '', 'label': label, 'tier': tier}
 
 
-def decide_leniency(answers, verdict, criterion=''):
+def decide_leniency(answers, verdict):
     if verdict == 'approve' and answers.get('divergence_observed', 0.0) > 0.7:
-        return {'verdict': 'changes_requested', 'reason': f'jev: verifier observed divergence on {criterion}'}
+        return {'verdict': 'changes_requested', 'reason': 'jev: verifier observed divergence; recheck the checks list'}
     return {'verdict': verdict, 'reason': ''}
 
 
