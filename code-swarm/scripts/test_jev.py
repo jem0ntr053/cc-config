@@ -97,11 +97,11 @@ class TestJev(unittest.TestCase):
         self.assertEqual(r['label'], 'feature')
 
     def test_decide_leniency(self):
-        r = jev.decide_leniency({'divergence_observed': 0.8}, 'approve', criterion='c1')
+        r = jev.decide_leniency({'divergence_observed': 0.8}, 'approve')
         self.assertEqual(r['verdict'], 'changes_requested')
-        self.assertEqual(r['reason'], 'jev: verifier observed divergence on c1')
+        self.assertEqual(r['reason'], 'jev: verifier observed divergence; recheck the checks list')
 
-        r = jev.decide_leniency({'divergence_observed': 0.8}, 'changes_requested', criterion='c1')
+        r = jev.decide_leniency({'divergence_observed': 0.8}, 'changes_requested')
         self.assertEqual(r['verdict'], 'changes_requested')
 
         r = jev.decide_leniency({'divergence_observed': 0.5}, 'approve')
