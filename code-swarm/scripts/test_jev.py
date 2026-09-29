@@ -16,35 +16,35 @@ import jev
 
 
 def run(argv, key=None, repo=None):
-    tmpdir = tempfile.mkdtemp()
-    state_path = os.path.join(tmpdir, 'state.json')
-    with open(state_path, 'w') as f:
-        json.dump({'title': 'x'}, f)
-    log_path = os.path.join(tmpdir, 'jev.jsonl')
-    missing_key_file = os.path.join(tmpdir, 'no_such_.env')
+    with tempfile.TemporaryDirectory() as tmpdir:
+        state_path = os.path.join(tmpdir, 'state.json')
+        with open(state_path, 'w') as f:
+            json.dump({'title': 'x'}, f)
+        log_path = os.path.join(tmpdir, 'jev.jsonl')
+        missing_key_file = os.path.join(tmpdir, 'no_such_.env')
 
-    env = dict(os.environ)
-    env.pop('TYPESAFE_API_KEY', None)
-    env.pop('JEV_REPO', None)
-    if key is not None:
-        env['TYPESAFE_API_KEY'] = key
-    if repo is not None:
-        env['JEV_REPO'] = repo
-    env['JEV_LOG'] = log_path
+        env = dict(os.environ)
+        env.pop('TYPESAFE_API_KEY', None)
+        env.pop('JEV_REPO', None)
+        if key is not None:
+            env['TYPESAFE_API_KEY'] = key
+        if repo is not None:
+            env['JEV_REPO'] = repo
+        env['JEV_LOG'] = log_path
 
-    full_argv = [argv[0], state_path] + argv[1:]
+        full_argv = [argv[0], state_path] + argv[1:]
 
-    with patch.dict(os.environ, env, clear=True), \
-         patch.object(jev, 'KEY_FILE', missing_key_file):
-        buf = io.StringIO()
-        with contextlib.redirect_stdout(buf):
-            code = jev.main(full_argv)
+        with patch.dict(os.environ, env, clear=True), \
+             patch.object(jev, 'KEY_FILE', missing_key_file):
+            buf = io.StringIO()
+            with contextlib.redirect_stdout(buf):
+                code = jev.main(full_argv)
 
-    out = json.loads(buf.getvalue())
-    log_lines = []
-    if os.path.exists(log_path):
-        with open(log_path) as f:
-            log_lines = [json.loads(line) for line in f if line.strip()]
+        out = json.loads(buf.getvalue())
+        log_lines = []
+        if os.path.exists(log_path):
+            with open(log_path) as f:
+                log_lines = [json.loads(line) for line in f if line.strip()]
     return code, out, log_lines
 
 
@@ -144,8 +144,18 @@ class TestJev(unittest.TestCase):
         self.assertEqual(entry['mode'], 'shadow')
         self.assertTrue(entry['answers']['skipped'])
 
+    def test_run_leaves_no_temp_dir(self):
+        private = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, private, ignore_errors=True)
+        old = tempfile.tempdir
+        self.addCleanup(setattr, tempfile, 'tempdir', old)
+        tempfile.tempdir = private
+        run(['issue_pretriage'])
+        self.assertEqual(os.listdir(private), [])
+
     def test_log_repo_is_repo_not_worktree(self):
         base = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, base, ignore_errors=True)
         repo = os.path.join(base, 'myrepo')
         os.makedirs(repo)
         subprocess.run(['git', 'init', '-q'], cwd=repo, check=True, capture_output=True)
@@ -166,6 +176,7 @@ class TestJev(unittest.TestCase):
             os.chdir(cwd)
 
         plain = tempfile.mkdtemp()
+        self.addCleanup(shutil.rmtree, plain, ignore_errors=True)
         try:
             os.chdir(plain)
             _, _, log_lines = run(['issue_pretriage'])
