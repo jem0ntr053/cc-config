@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# PreCompact hook: inject CLAUDE.md + memory index into compaction context
+# SessionStart (matcher: compact) hook: re-inject CLAUDE.md + memory index after compaction.
+# PreCompact cannot add context, so this runs on the post-compact session start instead.
 input=$(cat)
 cwd=$(echo "$input" | jq -r '.workspace.current_dir // .cwd // ""' 2>/dev/null)
 [ -z "$cwd" ] && cwd="$PWD"
@@ -16,10 +17,10 @@ claude_md="$cwd/CLAUDE.md"
 
 [ -z "$context" ] && exit 0
 
-# PreCompact additionalContext capped at 10000 chars
+# additionalContext capped at 10000 chars
 if [ "${#context}" -gt 9950 ]; then
   context="${context:0:9900}"$'\n…[truncated]'
 fi
 
 jq -n --arg ctx "$context" \
-  '{hookSpecificOutput:{hookEventName:"PreCompact",additionalContext:$ctx}}'
+  '{hookSpecificOutput:{hookEventName:"SessionStart",additionalContext:$ctx}}'

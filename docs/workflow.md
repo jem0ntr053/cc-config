@@ -57,7 +57,7 @@ Don't try to plan more than one issue at once.
 |---------|--------|
 | "I don't know where to start" | `gh issue list` → pick one |
 | "Claude is slow / drifting" | `/clear`, restart with one-sentence goal |
-| "Context feels bloated" | `/compact` - precompact hook injects MEMORY.md + CLAUDE.md |
+| "Context feels bloated" | `/compact` - post-compact hook re-injects MEMORY.md + CLAUDE.md |
 | "Forgot what I was doing" | `git status` + `git log --oneline -5` |
 | "What was decided last time?" | Read `~/.claude/projects/-Users-montrose-dotfiles/memory/MEMORY.md` |
 | "What skill applies here?" | Check the `available skills` list in Claude's session-start reminder |
