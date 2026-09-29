@@ -93,7 +93,7 @@ def repo_name():
         return 'unknown'
 
 
-def log_line(gate, mode, state, answers, agent_did):
+def log_line(gate, mode, state, answers, agent_did, flagged=False):
     path = os.environ.get('JEV_LOG') or LOG_DEFAULT
     try:
         os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -108,6 +108,8 @@ def log_line(gate, mode, state, answers, agent_did):
             'answers': answers,
             'agent_did': agent_did,
         }
+        if flagged:
+            entry['state'] = state
         with open(path, 'a') as f:
             f.write(json.dumps(entry) + '\n')
     except OSError:
@@ -161,6 +163,22 @@ def decide_sizing(answers, depends_on=()):
     return {'split': split, 'flag_dependency': flag_dependency}
 
 
+def would_act(battery, out, agent_did):
+    if 'skipped' in out:
+        return False
+    if battery == 'issue_pretriage':
+        d = decide_pretriage(out)
+        return bool(d['needs_human'] or d['label'] or d['tier'] == 'opus')
+    if battery == 'verifier_leniency':
+        verdict = agent_did.get('verdict') if isinstance(agent_did, dict) else None
+        return decide_leniency(out, verdict)['verdict'] != verdict
+    if battery == 'finding_dedup':
+        return out.get('same_problem', 0) >= 0.2
+    if battery == 'feature_sizing':
+        return any(decide_sizing(out).values())
+    return False
+
+
 def main(argv=None):
     try:
         parser = argparse.ArgumentParser()
@@ -191,7 +209,7 @@ def main(argv=None):
                 except Exception as e:
                     out = {'skipped': True, 'reason': f'{type(e).__name__}: {e}'}
 
-        log_line(gate, args.mode, state, out, agent_did)
+        log_line(gate, args.mode, state, out, agent_did, flagged=would_act(args.battery, out, agent_did))
         if args.battery == 'issue_pretriage' and 'skipped' not in out:
             out['decision'] = decide_pretriage(out)
         print(json.dumps(out))
